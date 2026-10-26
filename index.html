@@ -99,30 +99,57 @@ async function refreshApprovedRegistrations(){
     render();
   }catch(error){console.warn('Could not load approved EPL registrations:',error.message)}
 }
-async function submitRegistration(formId,type,messageId){
-  const form=document.getElementById(formId); const message=document.getElementById(messageId);
-  message.textContent='Submitting…';
-  const values=Object.fromEntries(new FormData(form).entries());
-  if(type==='team') values.short_code=values.short_code.trim().toUpperCase();
-  try{
+
+async function submitRegistration(formId, type, messageId) {
+  const form = document.getElementById(formId);
+  const message = document.getElementById(messageId);
+
+  message.textContent = 'Submitting…';
+
+  const formData = new FormData(form);
+  const values = Object.fromEntries(formData.entries());
+
+  if (type === 'team') {
+    values.short_code = String(values.short_code || '').trim().toUpperCase();
+
+    values.starting_five = formData
+      .getAll('starting_five')
+      .map(name => String(name).trim());
+
+    values.backup_players = formData
+      .getAll('backup_players')
+      .map(name => String(name).trim())
+      .filter(Boolean);
+  }
+
+  try {
     const response = await fetch(registrationEndpoint, {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json',
-    'apikey': 'sb_publishable_ZRHsHMLHl65-9J46BmIXmQ_F5Hi-A5h'
-  },
-  body: JSON.stringify({ type, ...values })
-});
-    const result=await response.json().catch(()=>({}));
-    if(!response.ok) throw new Error(result.error||'Could not submit registration. Please try again.');
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'apikey': 'sb_publishable_ZRHsHMLHl65-9J46BmIXmQ_F5Hi-A5h'
+      },
+      body: JSON.stringify({ type, ...values })
+    });
+
+    const result = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      throw new Error(
+        result.error || 'Could not submit registration. Please try again.'
+      );
+    }
+
     form.reset();
-    message.textContent='✅ Registration submitted! It is pending staff review. Keep an eye on Discord for updates.';
-  }catch(error){message.textContent='⚠️ '+error.message;}
+    message.textContent =
+      '✅ Registration submitted! It is pending staff review. Keep an eye on Discord for updates.';
+  } catch (error) {
+    message.textContent = '⚠️ ' + error.message;
+  }
 }
 document.getElementById('teamRegistrationForm').addEventListener('submit',event=>{event.preventDefault();submitRegistration('teamRegistrationForm','team','teamRegistrationMsg')});
 document.getElementById('playerRegistrationForm').addEventListener('submit',event=>{event.preventDefault();submitRegistration('playerRegistrationForm','player','playerRegistrationMsg')});
-
 render();
 refreshApprovedRegistrations();
 </script></body></html>
