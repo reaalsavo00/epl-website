@@ -22,33 +22,48 @@
   const team = id => state.teams.find(t=>t.id===id) || {team_name:'TBD',short_code:'—'};
   const matchName = m => `${team(m.home_team_id).team_name} vs ${team(m.away_team_id).team_name}`;
   const fmt = v => v ? new Date(v).toLocaleString(undefined,{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) : 'Date TBC';
+  // Roblox's public web APIs do not expose browser CORS headers. Use a GET-only
+  // CORS bridge for the public username search and thumbnail JSON; the image
+  // itself is then loaded directly from Roblox's CDN in the <img> element.
+  const ROBLOX_CORS_BRIDGE='https://proxy.cors.dev/';
+  async function robloxPublicGet(url){
+    const response=await fetch(ROBLOX_CORS_BRIDGE+url,{headers:{Accept:'application/json'},credentials:'omit'});
+    if(!response.ok)throw new Error(`Roblox lookup returned ${response.status}`);
+    return response.json();
+  }
   async function getAvatar(username){
     const name=String(username||'').trim();
     if(!name)return '';
     const cacheKey=name.toLowerCase();
     if(avatarCache.has(cacheKey))return avatarCache.get(cacheKey);
     try {
-      const userResponse=await fetch('https://users.roblox.com/v1/usernames/users',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({usernames:[name],excludeBannedUsers:true}),credentials:'omit'});
-      if(!userResponse.ok)throw new Error('Roblox username lookup failed');
-      const userData=await userResponse.json();
-      const userId=userData.data?.[0]?.id;
-      if(!userId){avatarCache.set(cacheKey,'');return '';}
+      // Search is GET-based so it works through the public bridge. Match the
+      // exact Roblox username, not a similar result or display name.
+      const searchUrl='https://users.roblox.com/v1/users/search?'+new URLSearchParams({keyword:name,limit:'10'}).toString();
+      const userData=await robloxPublicGet(searchUrl);
+      const matchedUser=(userData.data||[]).find(user=>String(user.name||'').toLowerCase()===cacheKey);
+      const userId=matchedUser?.id;
+      if(!userId)return '';
+      const thumbUrl='https://thumbnails.roblox.com/v1/users/avatar-headshot?'+new URLSearchParams({userIds:String(userId),size:'150x150',format:'Png',isCircular:'false'}).toString();
       let imageUrl='';
-      for(let attempt=0;attempt<2&&!imageUrl;attempt++){
-        const thumbResponse=await fetch(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=false`,{credentials:'omit'});
-        if(!thumbResponse.ok)break;
-        const thumbData=await thumbResponse.json();
-        const thumb=thumbData.data?.find(x=>x.state==='Completed'&&x.imageUrl)||thumbData.data?.find(x=>x.imageUrl);
+      for(let attempt=0;attempt<3&&!imageUrl;attempt++){
+        const thumbData=await robloxPublicGet(thumbUrl);
+        const thumb=(thumbData.data||[]).find(item=>item.state==='Completed'&&item.imageUrl)||(thumbData.data||[]).find(item=>item.imageUrl);
         imageUrl=thumb?.imageUrl||'';
-        if(!imageUrl&&attempt===0)await new Promise(resolve=>setTimeout(resolve,450));
+        if(!imageUrl&&attempt<2)await new Promise(resolve=>setTimeout(resolve,650));
       }
-      avatarCache.set(cacheKey,imageUrl);
+      if(imageUrl)avatarCache.set(cacheKey,imageUrl);
       return imageUrl;
-    } catch(error) { console.warn('Roblox avatar could not be loaded for',name,error); avatarCache.set(cacheKey,''); return ''; }
+    } catch(error) { console.warn('Roblox avatar could not be loaded for',name,error); return ''; }
   }
   async function hydratePeople(people){
     const unique=[...new Set((people||[]).filter(p=>p&&!p.avatar_url&&!p._avatarTried))];
-    await Promise.all(unique.map(async p=>{p._avatarTried=true;p.avatar_url=await getAvatar(p.roblox_username);}));
+    await Promise.all(unique.map(async p=>{
+      p._avatarTried=true;
+      p.avatar_url=await getAvatar(p.roblox_username);
+      // Let a later owner refresh retry transient proxy/API failures.
+      if(!p.avatar_url)p._avatarTried=false;
+    }));
   }
   async function hydrateAvatars(){
     await hydratePeople([...state.players,...state.freeAgents]);
@@ -145,7 +160,7 @@
     const initials=String(discordName).trim().split(/\s+/).map(x=>x[0]).join('').slice(0,2).toUpperCase()||'E';
     identity.innerHTML=`${robloxName?playerAvatar(ownProfile,'owner-status-avatar'):`<span class="owner-avatar-unlinked">${esc(initials)}</span>`}<div><b>${esc(discordName)}</b><small>${robloxName?'Roblox · @'+esc(robloxName):'Discord account connected · add your Roblox username below'}</small></div>`;
     identity.hidden=false;
-    status.textContent=robloxName?'Roblox avatar linked where available.':'Link your Roblox username to display your headshot.';
+    status.textContent=robloxName?(ownProfile.avatar_url?'Roblox headshot loaded.':'Username saved, but no headshot loaded. Check the username and try saving again.'):'Link your Roblox username to display your headshot.';
     try{const d=await ownerApi({action:'owner-data'});state.ownedTeams=d.teams||[];state.ownerRoster=d.roster||[];state.availablePlayers=d.availablePlayers||[];await hydratePeople([...state.ownerRoster,...state.availablePlayers]);panel.style.display='block';renderOwner();}
     catch(e){status.textContent='Sign-in active · '+e.message;panel.style.display='none';}
   }
@@ -166,7 +181,7 @@
     const username=$('ownerRobloxUsername').value.trim();
     if(username.length<3){say('ownerAuthStatus','Enter your Roblox username first.');return;}
     const button=$('saveOwnerRoblox');button.disabled=true;button.textContent='Saving…';
-    try{const {error}=await sb.auth.updateUser({data:{roblox_username:username}});if(error)throw error;avatarCache.delete(username.toLowerCase());await refreshOwner();say('ownerAuthStatus','Roblox username saved. Your headshot will show when Roblox returns a matching avatar.');}
+    try{const {error}=await sb.auth.updateUser({data:{roblox_username:username}});if(error)throw error;avatarCache.delete(username.toLowerCase());await refreshOwner();}
     catch(error){say('ownerAuthStatus','Could not save Roblox username: '+(error.message||'Please try again.'));}
     finally{button.disabled=false;button.textContent='Save my Roblox avatar';}
   };
