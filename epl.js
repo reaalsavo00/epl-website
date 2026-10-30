@@ -4,6 +4,8 @@
   const API = URL + '/functions/v1/epl-api';
   const sb = window.supabase.createClient(URL, KEY);
   const state = { teams:[], players:[], freeAgents:[], matches:[], stats:[], pendingTeams:[], pendingPlayers:[], pendingAgents:[], news:[], ownedTeams:[], ownerRoster:[], availablePlayers:[] };
+  const avatarCache = new Map();
+  let openTeamProfileId = null;
   const $ = id => document.getElementById(id);
   const esc = s => String(s ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const say = (id,t) => { const el=$(id); if(el) el.textContent=t; };
@@ -20,29 +22,61 @@
   const team = id => state.teams.find(t=>t.id===id) || {team_name:'TBD',short_code:'—'};
   const matchName = m => `${team(m.home_team_id).team_name} vs ${team(m.away_team_id).team_name}`;
   const fmt = v => v ? new Date(v).toLocaleString(undefined,{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) : 'Date TBC';
-  function avatarUrl(url){return url || 'https://tr.rbxcdn.com/30DAY-AvatarHeadshot-PLACEHOLDER/150/150/AvatarHeadshot/Webp/noFilter';}
   async function getAvatar(username){
-    try { const u=await fetch('https://users.roblox.com/v1/usernames/users',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({usernames:[username],excludeBannedUsers:true})}); const ud=await u.json(); const id=ud.data?.[0]?.id; if(!id)return ''; const t=await fetch(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${id}&size=150x150&format=Png&isCircular=false`); const td=await t.json(); return td.data?.[0]?.imageUrl||''; } catch { return ''; }
+    const name=String(username||'').trim();
+    if(!name)return '';
+    const cacheKey=name.toLowerCase();
+    if(avatarCache.has(cacheKey))return avatarCache.get(cacheKey);
+    try {
+      const userResponse=await fetch('https://users.roblox.com/v1/usernames/users',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({usernames:[name],excludeBannedUsers:true}),credentials:'omit'});
+      if(!userResponse.ok)throw new Error('Roblox username lookup failed');
+      const userData=await userResponse.json();
+      const userId=userData.data?.[0]?.id;
+      if(!userId){avatarCache.set(cacheKey,'');return '';}
+      let imageUrl='';
+      for(let attempt=0;attempt<2&&!imageUrl;attempt++){
+        const thumbResponse=await fetch(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=false`,{credentials:'omit'});
+        if(!thumbResponse.ok)break;
+        const thumbData=await thumbResponse.json();
+        const thumb=thumbData.data?.find(x=>x.state==='Completed'&&x.imageUrl)||thumbData.data?.find(x=>x.imageUrl);
+        imageUrl=thumb?.imageUrl||'';
+        if(!imageUrl&&attempt===0)await new Promise(resolve=>setTimeout(resolve,450));
+      }
+      avatarCache.set(cacheKey,imageUrl);
+      return imageUrl;
+    } catch(error) { console.warn('Roblox avatar could not be loaded for',name,error); avatarCache.set(cacheKey,''); return ''; }
+  }
+  async function hydratePeople(people){
+    const unique=[...new Set((people||[]).filter(p=>p&&!p.avatar_url&&!p._avatarTried))];
+    await Promise.all(unique.map(async p=>{p._avatarTried=true;p.avatar_url=await getAvatar(p.roblox_username);}));
   }
   async function hydrateAvatars(){
-    const people=[...state.players,...state.freeAgents];
-    await Promise.all(people.filter(p=>!p.avatar_url&&!p._avatarTried).map(async p=>{p._avatarTried=true;p.avatar_url=await getAvatar(p.roblox_username);}));
+    await hydratePeople([...state.players,...state.freeAgents]);
     renderPlayers(); renderAgents();
+    if(openTeamProfileId)renderTeamProfile(openTeamProfileId,false);
+  }
+  function playerAvatar(p,extraClass=''){
+    const label=String(p.display_name||p.roblox_username||'').trim();
+    const initials=(label.split(/\s+/).map(x=>x[0]).join('').slice(0,2)||'RB').toUpperCase();
+    const cls=('epl-avatar '+extraClass).trim();
+    const fallback=`<span class="epl-avatar-fallback"${p.avatar_url?' hidden':''}>${esc(initials)}</span>`;
+    return `<span class="epl-avatar-wrap"><img class="${cls}" src="${esc(p.avatar_url||'') }" alt="${esc(p.roblox_username||'Roblox')} avatar" ${p.avatar_url?'':'hidden'} onerror="this.hidden=true;this.nextElementSibling.hidden=false">${fallback}</span>`;
   }
   function teamMark(t){return t.logo_url?`<img class="epl-team-logo" src="${esc(t.logo_url)}" alt="">`:`<span class="teammark">${esc(t.short_code||'EPL')}</span>`;}
   function standings(){return state.teams.map(t=>{let ms=state.matches.filter(m=>m.status==='played'&&(m.home_team_id===t.id||m.away_team_id===t.id));let w=0,l=0,pf=0,pa=0;ms.forEach(m=>{let h=m.home_team_id===t.id,f=h?m.home_score:m.away_score,a=h?m.away_score:m.home_score;pf+=f||0;pa+=a||0;if(f>a)w++;else if(f<a)l++;});return {...t,played:ms.length,w,l,pf,pa,diff:pf-pa,pts:w*2};}).sort((a,b)=>b.pts-a.pts||b.diff-a.diff||b.pf-a.pf);}
   function tableHTML(rows){if(!rows.length)return '<div class="empty">No approved teams yet.</div>';return `<table><thead><tr><th>#</th><th>Team</th><th>P</th><th>W</th><th>L</th><th>PF</th><th>PA</th><th>+/-</th><th>Pts</th></tr></thead><tbody>${rows.map((t,i)=>`<tr><td class="rank">${String(i+1).padStart(2,'0')}</td><td>${teamMark(t)} <b>${esc(t.team_name)}</b></td><td>${t.played}</td><td>${t.w}</td><td>${t.l}</td><td>${t.pf}</td><td>${t.pa}</td><td>${t.diff>0?'+':''}${t.diff}</td><td><b>${t.pts}</b></td></tr>`).join('')}</tbody></table>`;}
   function matchHTML(m){const home=team(m.home_team_id),away=team(m.away_team_id);return `<div class="match"><div class="date">${esc(fmt(m.scheduled_at))} · ${esc(m.match_note||'EPL MATCH')}</div><div class="matchup"><div class="match-side home">${teamMark(home)}<b>${esc(home.team_name)}</b></div><div class="match-centre"><div class="score">${m.status==='played'?`${m.home_score} <span>:</span> ${m.away_score}`:'VS'}</div><span class="pill">${m.status==='played'?'FT':'SCHEDULED'}</span></div><div class="match-side away"><b>${esc(away.team_name)}</b>${teamMark(away)}</div></div></div>`;}
-  function renderTeamProfile(teamId){
+  function renderTeamProfile(teamId,scroll=true){
+    openTeamProfileId=teamId;
     const panel=$('teamProfile');const t=state.teams.find(x=>x.id===teamId);if(!t||!panel)return;
     const record=standings().find(x=>x.id===teamId)||{played:0,w:0,l:0,pf:0,pa:0,pts:0};
     const roster=state.players.filter(p=>p.team_id===teamId).sort((a,b)=>String(a.display_name).localeCompare(String(b.display_name)));
     const played=state.matches.filter(m=>m.status==='played'&&(m.home_team_id===teamId||m.away_team_id===teamId)).sort((a,b)=>String(b.scheduled_at||'').localeCompare(String(a.scheduled_at||'')));
     const recent=played.slice(0,5);
     const matchRows=recent.map(m=>{const isHome=m.home_team_id===teamId,opponent=team(isHome?m.away_team_id:m.home_team_id),forScore=isHome?m.home_score:m.away_score,against=isHome?m.away_score:m.home_score;return `<div class="team-profile-match"><span>${esc(fmt(m.scheduled_at))} · ${esc(opponent.team_name)}</span><b>${forScore}–${against} ${forScore>against?'W':forScore<against?'L':'D'}</b></div>`;}).join('')||'<div class="empty">No completed matches recorded yet.</div>';
-    const playersHtml=roster.map(p=>{const playerRows=state.stats.filter(x=>x.player_registration_id===p.id).filter(x=>recent.some(m=>m.id===x.match_id));const sum=k=>playerRows.reduce((n,x)=>n+(Number(x[k])||0),0);return `<div class="team-profile-player"><div class="team-profile-player-info"><b>${esc(p.display_name)}</b><div class="tiny">@${esc(p.roblox_username)} · ${esc(p.position||'Player')} · ${esc(p.roster_role||'Squad')}</div></div><div class="team-profile-player-stats"><span class="player-stat"><b>${sum('points')}</b><small>PTS</small></span><span class="player-stat"><b>${sum('rebounds')}</b><small>REB</small></span><span class="player-stat"><b>${sum('assists')}</b><small>AST</small></span><span class="player-stat"><b>${sum('steals')}</b><small>STL</small></span><span class="player-stat"><b>${sum('blocks')}</b><small>BLK</small></span><span class="player-stat-note">Last ${recent.length} team games</span></div></div>`;}).join('')||'<div class="empty">No approved players are currently linked to this team.</div>';
+    const playersHtml=roster.map(p=>{const playerRows=state.stats.filter(x=>x.player_registration_id===p.id).filter(x=>recent.some(m=>m.id===x.match_id));const sum=k=>playerRows.reduce((n,x)=>n+(Number(x[k])||0),0);return `<div class="team-profile-player"><div class="team-profile-player-info">${playerAvatar(p,'team-roster-avatar')}<div class="team-profile-player-copy"><b>${esc(p.display_name)}</b><div class="tiny">@${esc(p.roblox_username)} · ${esc(p.position||'Player')} · ${esc(p.roster_role||'Squad')}</div></div></div><div class="team-profile-player-stats"><span class="player-stat"><b>${sum('points')}</b><small>PTS</small></span><span class="player-stat"><b>${sum('rebounds')}</b><small>REB</small></span><span class="player-stat"><b>${sum('assists')}</b><small>AST</small></span><span class="player-stat"><b>${sum('steals')}</b><small>STL</small></span><span class="player-stat"><b>${sum('blocks')}</b><small>BLK</small></span><span class="player-stat-note">Last ${recent.length} team games</span></div></div>`;}).join('')||'<div class="empty">No approved players are currently linked to this team.</div>';
     panel.innerHTML=`<div class="team-profile-head">${teamMark(t)}<div><div class="eyebrow">Team profile</div><h2 style="margin:5px 0">${esc(t.team_name)}</h2><p class="muted" style="margin:0">${esc(t.region||'Europe')} · Captain: ${esc(t.captain_name||'Not listed')}</p></div><button class="btn" type="button" id="closeTeamProfile" style="margin-left:auto">Close ✕</button></div><div class="team-profile-record"><div class="profile-metric"><strong>${record.played}</strong><span>GAMES</span></div><div class="profile-metric"><strong>${record.w}</strong><span>WINS</span></div><div class="profile-metric"><strong>${record.l}</strong><span>LOSSES</span></div><div class="profile-metric"><strong>${record.pf}</strong><span>PTS FOR</span></div><div class="profile-metric"><strong>${record.pa}</strong><span>PTS AGAINST</span></div><div class="profile-metric"><strong>${record.pts}</strong><span>TABLE PTS</span></div></div><div class="team-profile-content"><div class="team-profile-squad"><h3>Squad & recent player stats</h3><p class="profile-help">Player totals from the team's last ${recent.length} completed games. Stats appear when entered by league admins.</p>${playersHtml}</div><div class="team-profile-results"><h3>Recent results</h3>${matchRows}</div></div>`;
-    panel.classList.remove('hidden');panel.scrollIntoView({behavior:'smooth',block:'start'});$('closeTeamProfile').onclick=()=>{panel.classList.add('hidden');panel.innerHTML='';};
+    panel.classList.remove('hidden');if(scroll)panel.scrollIntoView({behavior:'smooth',block:'start'});$('closeTeamProfile').onclick=()=>{openTeamProfileId=null;panel.classList.add('hidden');panel.innerHTML='';};
   }
   function renderPublic(){
     const played=state.matches.filter(m=>m.status==='played'); $('statTeams').textContent=state.teams.length; $('statPlayed').textContent=played.length; $('statPlayers').textContent=state.players.length+state.freeAgents.length;
@@ -55,7 +89,7 @@
     const newsHtml=(state.news||[]).map(n=>`<article class="newsitem"><span class="pill">${esc(n.category||'Announcement')}</span><h4>${esc(n.title)}</h4><p>${esc(n.body)}</p><small class="tiny">${esc(fmt(n.created_at))}</small></article>`).join('')||'<div class="empty">No announcements yet.</div>'; if($('newsList'))$('newsList').innerHTML=newsHtml;if($('homeNews'))$('homeNews').innerHTML=(state.news||[]).slice(0,3).map(n=>`<div class="card"><span class="pill">${esc(n.category||'News')}</span><h3 style="margin-top:12px">${esc(n.title)}</h3><p class="muted">${esc(n.body.slice(0,180))}</p></div>`).join('')||'<div class="card empty">League announcements will appear here.</div>';
     const teamSelect=$('regPlayerTeam'); if(teamSelect){const current=teamSelect.value;teamSelect.innerHTML='<option value="">Free Agent / no team</option>'+state.teams.map(t=>`<option value="${t.id}">${esc(t.team_name)}</option>`).join('');teamSelect.value=current;}
   }
-  function playerCard(p,isAgent=false){const teamName=isAgent?'Free Agent':(p.team_name||'Free Agent');return `<div class="epl-player-row"><img class="epl-avatar" src="${esc(p.avatar_url||'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=')}" alt="${esc(p.roblox_username)} avatar"><div class="epl-player-info"><b>${esc(p.display_name)}</b><span>@${esc(p.roblox_username)} · ${esc(teamName)}</span><small>${esc(p.position||'Player')}</small></div><div class="epl-player-stats">${statSummary(p.id)}</div></div>`;}
+  function playerCard(p,isAgent=false){const teamName=isAgent?'Free Agent':(p.team_name||'Free Agent');return `<div class="epl-player-row">${playerAvatar(p)}<div class="epl-player-info"><b>${esc(p.display_name)}</b><span>@${esc(p.roblox_username)} · ${esc(teamName)}</span><small>${esc(p.position||'Player')}</small></div><div class="epl-player-stats">${statSummary(p.id)}</div></div>`;}
   function statSummary(id){const rows=state.stats.filter(s=>s.player_registration_id===id);if(!rows.length)return '<span class="tiny">No stats recorded yet</span>';const sum=k=>rows.reduce((n,r)=>n+(Number(r[k])||0),0);return `<span><b>${sum('points')}</b> PTS</span><span><b>${sum('rebounds')}</b> REB</span><span><b>${sum('assists')}</b> AST</span><span><b>${sum('steals')}</b> STL</span><span><b>${sum('blocks')}</b> BLK</span><span><b>${sum('turnovers')}</b> TO</span><span><b>${sum('fouls')}</b> PF</span><span><b>${sum('minutes')}</b> MIN</span>`;}
   function renderPlayers(){const q=($('playerSearch')?.value||'').toLowerCase();const list=state.players.filter(p=>(p.display_name+' '+p.roblox_username+' '+(p.team_name||'')).toLowerCase().includes(q));$('playersTable').innerHTML=list.map(p=>playerCard(p,false)).join('')||'<div class="empty">No players match that search.</div>';}
   function renderAgents(){const q=($('agentSearch')?.value||'').toLowerCase();const list=state.freeAgents.filter(p=>(p.display_name+' '+p.roblox_username).toLowerCase().includes(q));$('freeAgentsList').innerHTML=list.map(p=>playerCard(p,true)).join('')||'<div class="empty">No approved free agents yet.</div>';}
@@ -99,10 +133,20 @@
   async function ownerApi(body){return adminApi(body);}
   async function refreshOwner(){
     const {data:{session}}=await sb.auth.getSession();
-    const status=$('ownerAuthStatus'),panel=$('ownerDashboard');
-    if(!session){status.textContent='Not signed in';panel.style.display='none';return;}
-    const meta=session.user.user_metadata||{};status.textContent='Signed in as '+(meta.full_name||meta.name||meta.user_name||'Discord user');
-    try{const d=await ownerApi({action:'owner-data'});state.ownedTeams=d.teams||[];state.ownerRoster=d.roster||[];state.availablePlayers=d.availablePlayers||[];panel.style.display='block';renderOwner();}
+    const status=$('ownerAuthStatus'),panel=$('ownerDashboard'),identity=$('ownerIdentity'),robloxSetting=$('ownerRobloxSetting');
+    if(!session){status.textContent='Not signed in';identity.hidden=true;robloxSetting.hidden=true;panel.style.display='none';return;}
+    const meta=session.user.user_metadata||{};
+    const discordName=meta.full_name||meta.name||meta.user_name||'Discord user';
+    const robloxName=String(meta.roblox_username||'').trim();
+    $('ownerRobloxUsername').value=robloxName;
+    robloxSetting.hidden=false;
+    const ownProfile={display_name:discordName,roblox_username:robloxName,avatar_url:''};
+    if(robloxName)await hydratePeople([ownProfile]);
+    const initials=String(discordName).trim().split(/\s+/).map(x=>x[0]).join('').slice(0,2).toUpperCase()||'E';
+    identity.innerHTML=`${robloxName?playerAvatar(ownProfile,'owner-status-avatar'):`<span class="owner-avatar-unlinked">${esc(initials)}</span>`}<div><b>${esc(discordName)}</b><small>${robloxName?'Roblox · @'+esc(robloxName):'Discord account connected · add your Roblox username below'}</small></div>`;
+    identity.hidden=false;
+    status.textContent=robloxName?'Roblox avatar linked where available.':'Link your Roblox username to display your headshot.';
+    try{const d=await ownerApi({action:'owner-data'});state.ownedTeams=d.teams||[];state.ownerRoster=d.roster||[];state.availablePlayers=d.availablePlayers||[];await hydratePeople([...state.ownerRoster,...state.availablePlayers]);panel.style.display='block';renderOwner();}
     catch(e){status.textContent='Sign-in active · '+e.message;panel.style.display='none';}
   }
   function renderOwner(){
@@ -111,13 +155,21 @@
     const teamId=approved[0].id,roster=state.ownerRoster.filter(p=>p.team_id===teamId);
     const starters=roster.filter(p=>p.roster_role==='starter').length,subs=roster.length-starters;
     $('ownerRoster').innerHTML=`<h3 style="margin-top:18px">${esc(approved[0].team_name)} · Squad (${roster.length}/15)</h3><p class="tiny">${starters}/5 starters · ${subs}/10 substitutes</p>`+
-      roster.map(p=>`<div class="epl-owner-row"><div><b>${esc(p.display_name)}</b><small>@${esc(p.roblox_username)} · ${esc(p.roster_role||'starter')}</small></div><div class="epl-owner-actions"><button class="btn" data-role="${p.id}" data-team="${teamId}" data-next="${p.roster_role==='starter'?'substitute':'starter'}">Make ${p.roster_role==='starter'?'sub':'starting'} player</button><button class="btn" data-remove="${p.id}" data-team="${teamId}">Remove</button></div></div>`).join('')+
+      roster.map(p=>`<div class="epl-owner-row"><div class="epl-owner-person">${playerAvatar(p,'owner-avatar')}<div><b>${esc(p.display_name)}</b><small>@${esc(p.roblox_username)} · ${esc(p.roster_role||'starter')}</small></div></div><div class="epl-owner-actions"><button class="btn" data-role="${p.id}" data-team="${teamId}" data-next="${p.roster_role==='starter'?'substitute':'starter'}">Make ${p.roster_role==='starter'?'sub':'starting'} player</button><button class="btn" data-remove="${p.id}" data-team="${teamId}">Remove</button></div></div>`).join('')+
       `<div class="formgrid" style="margin-top:14px"><div class="field"><label>Add approved player</label><select id="ownerAddPlayer"><option value="">Select player</option>${state.availablePlayers.map(p=>`<option value="${p.id}">${esc(p.display_name)} (@${esc(p.roblox_username)})</option>`).join('')}</select></div><div class="field"><label>Squad role</label><select id="ownerAddRole"><option value="starter">Starter</option><option value="substitute">Substitute</option></select></div></div><button class="btn primary" id="ownerAddBtn" data-team="${teamId}">Add player to squad</button><p id="ownerMsg" class="tiny"></p>`;
     document.querySelectorAll('[data-remove]').forEach(b=>b.onclick=async()=>{if(!confirm('Remove this player from your squad?'))return;try{await ownerApi({action:'owner-remove-player',team_id:b.dataset.team,player_id:b.dataset.remove});await refreshOwner();await loadPublic();}catch(e){say('ownerMsg','⚠️ '+e.message);}});
     document.querySelectorAll('[data-role]').forEach(b=>b.onclick=async()=>{try{await ownerApi({action:'owner-set-role',team_id:b.dataset.team,player_id:b.dataset.role,roster_role:b.dataset.next});await refreshOwner();}catch(e){say('ownerMsg','⚠️ '+e.message);}});
     $('ownerAddBtn').onclick=async()=>{try{await ownerApi({action:'owner-add-player',team_id:teamId,player_id:$('ownerAddPlayer').value,roster_role:$('ownerAddRole').value});await refreshOwner();await loadPublic();}catch(e){say('ownerMsg','⚠️ '+e.message);}};
   }
   $('discordOwnerLogin').onclick=async()=>{const {error}=await sb.auth.signInWithOAuth({provider:'discord',options:{redirectTo:window.location.origin+window.location.pathname,scopes:'identify email'}});if(error)say('ownerAuthStatus','Discord sign-in failed: '+error.message);};
+  $('saveOwnerRoblox').onclick=async()=>{
+    const username=$('ownerRobloxUsername').value.trim();
+    if(username.length<3){say('ownerAuthStatus','Enter your Roblox username first.');return;}
+    const button=$('saveOwnerRoblox');button.disabled=true;button.textContent='Saving…';
+    try{const {error}=await sb.auth.updateUser({data:{roblox_username:username}});if(error)throw error;avatarCache.delete(username.toLowerCase());await refreshOwner();say('ownerAuthStatus','Roblox username saved. Your headshot will show when Roblox returns a matching avatar.');}
+    catch(error){say('ownerAuthStatus','Could not save Roblox username: '+(error.message||'Please try again.'));}
+    finally{button.disabled=false;button.textContent='Save my Roblox avatar';}
+  };
   $('ownerSignOut').onclick=async()=>{await sb.auth.signOut();await refreshOwner();};
   sb.auth.onAuthStateChange(()=>setTimeout(refreshOwner,0));
   $('teamRegistrationForm').addEventListener('submit',e=>{e.preventDefault();formSubmit('teamRegistrationForm','register-team','teamRegistrationMsg',true)});
