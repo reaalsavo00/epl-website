@@ -3,12 +3,13 @@
   const KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV0aHZvd2d6ZG96ZWxqeGl2d3d5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI5NjI0MDMsImV4cCI6MjEwODUzODQwM30.kIYs6RIZqYC_fA-V6fAzwYX_Pt6J2DTRUsWIIREP2Uw';
   const API = URL + '/functions/v1/epl-api';
   const sb = window.supabase.createClient(URL, KEY);
-  const state = { teams:[], players:[], freeAgents:[], matches:[], stats:[], pendingTeams:[], pendingPlayers:[], pendingAgents:[] };
+  const state = { teams:[], players:[], freeAgents:[], matches:[], stats:[], pendingTeams:[], pendingPlayers:[], pendingAgents:[], ownedTeams:[], ownerRoster:[], availablePlayers:[] };
   const $ = id => document.getElementById(id);
   const esc = s => String(s ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const say = (id,t) => { const el=$(id); if(el) el.textContent=t; };
   async function publicApi(method='GET',body=null){
-    const r=await fetch(API,{method,headers:{apikey:KEY,Authorization:'Bearer '+KEY,'Content-Type':'application/json',Accept:'application/json'},...(body?{body:JSON.stringify(body)}:{})});
+    const {data:{session}}=await sb.auth.getSession();
+    const r=await fetch(API,{method,headers:{apikey:KEY,Authorization:'Bearer '+(session?.access_token||KEY),'Content-Type':'application/json',Accept:'application/json'},...(body?{body:JSON.stringify(body)}:{})});
     const data=await r.json().catch(()=>({})); if(!r.ok) throw new Error(data.error||'EPL service is unavailable.'); return data;
   }
   async function adminApi(body){
@@ -40,6 +41,7 @@
     $('teamsGrid').innerHTML=state.teams.map(t=>`<div class="card">${teamMark(t)}<h3 style="margin-top:13px">${esc(t.team_name)}</h3><p class="muted">${esc(t.region||'Europe')}</p><p class="tiny">Captain: ${esc(t.captain_name||'Not listed')}</p><span class="pill">${(s.find(x=>x.id===t.id)||{}).pts||0} points</span></div>`).join('')||'<div class="card empty">Team profiles will appear here after approval.</div>';
     $('tableSeason').textContent='SEASON 1';
     renderPlayers(); renderAgents();
+    const teamSelect=$('regPlayerTeam'); if(teamSelect){const current=teamSelect.value;teamSelect.innerHTML='<option value="">Free Agent / no team</option>'+state.teams.map(t=>`<option value="${t.id}">${esc(t.team_name)}</option>`).join('');teamSelect.value=current;}
   }
   function playerCard(p,isAgent=false){const teamName=isAgent?'Free Agent':(p.team_name||'Free Agent');return `<div class="epl-player-row"><img class="epl-avatar" src="${esc(p.avatar_url||'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=')}" alt="${esc(p.roblox_username)} avatar"><div class="epl-player-info"><b>${esc(p.display_name)}</b><span>@${esc(p.roblox_username)} · ${esc(teamName)}</span><small>${esc(p.position||'Player')}</small></div><div class="epl-player-stats">${statSummary(p.id)}</div></div>`;}
   function statSummary(id){const rows=state.stats.filter(s=>s.player_registration_id===id);if(!rows.length)return '<span class="tiny">No stats recorded yet</span>';const sum=k=>rows.reduce((n,r)=>n+(Number(r[k])||0),0);return `<span><b>${sum('points')}</b> PTS</span><span><b>${sum('rebounds')}</b> REB</span><span><b>${sum('assists')}</b> AST</span><span><b>${sum('steals')}</b> STL</span><span><b>${sum('blocks')}</b> BLK</span><span><b>${sum('turnovers')}</b> TO</span><span><b>${sum('fouls')}</b> PF</span><span><b>${sum('minutes')}</b> MIN</span>`;}
@@ -53,8 +55,7 @@
   $('adminNav').onclick=()=>window.openEplAdmin?.(); $('fixtureFilter').onchange=renderPublic;
   $('playerSearch').addEventListener('input',renderPlayers); $('agentSearch').addEventListener('input',renderAgents);
   async function uploadLogo(file){if(!file)return null;if(!['image/png','image/jpeg','image/webp'].includes(file.type)||file.size>2*1024*1024)throw new Error('Logo must be PNG, JPG or WEBP and under 2 MB.');const ext=file.type==='image/png'?'png':file.type==='image/webp'?'webp':'jpg';const path=`team-logos/${crypto.randomUUID()}.${ext}`;const {error}=await sb.storage.from('epl-team-logos').upload(path,file,{contentType:file.type,upsert:false});if(error)throw error;return sb.storage.from('epl-team-logos').getPublicUrl(path).data.publicUrl;}
-  async function formSubmit(formId,action,msgId,withLogo=false){const form=$(formId);say(msgId,'Submitting…');try{const values=Object.fromEntries(new FormData(form).entries());if(withLogo){values.logo_url=await uploadLogo(form.querySelector('input[type=file]').files[0]);delete values.team_logo;}const result=await publicApi('POST',{action,...values});form.reset();say(msgId,'✅ Submitted! Your registration is pending approval by EPL staff.');}catch(e){say(msgId,'⚠️ '+e.message);}}
-  $('teamRegistrationForm').addEventListener('submit',e=>{e.preventDefault();formSubmit('teamRegistrationForm','register-team','teamRegistrationMsg',true)});
+  async function formSubmit(formId,action,msgId,withLogo=false){const form=$(formId);say(msgId,'Submitting…');try{const values=Object.fromEntries(new FormData(form).entries());if(withLogo){values.logo_url=await uploadLogo(form.querySelector('input[type=file]').files[0]);delete values.team_logo;}if(action==='register-player'){values.team_id=values.team_id||null;delete values.team_name;}const result=await publicApi('POST',{action,...values});form.reset();say(msgId,'✅ Submitted! Your registration is pending approval by EPL staff.');}catch(e){say(msgId,'⚠️ '+e.message);}}
   $('playerRegistrationForm').addEventListener('submit',e=>{e.preventDefault();formSubmit('playerRegistrationForm','register-player','playerRegistrationMsg')});
   $('freeAgentRegistrationForm').addEventListener('submit',e=>{e.preventDefault();formSubmit('freeAgentRegistrationForm','register-free-agent','freeAgentRegistrationMsg')});
   function options(el,items,label){$(el).innerHTML=`<option value="">${label}</option>`+items.map(x=>`<option value="${x.id}">${esc(x.team_name||x.display_name)}</option>`).join('');}
@@ -73,5 +74,30 @@
   $('createFixture').onclick=async()=>{try{await adminApi({action:'create-match',home_team_id:$('matchHome').value,away_team_id:$('matchAway').value,scheduled_at:$('matchDate').value?new Date($('matchDate').value).toISOString():null,match_note:$('matchNote').value});say('matchMsg','Fixture saved to the shared EPL database.');$('matchDate').value='';$('matchNote').value='';await loadPublic();await loadAdmin();}catch(e){say('matchMsg','⚠️ '+e.message);}};
   $('saveResult').onclick=async()=>{try{await adminApi({action:'save-result',match_id:$('resultMatch').value,home_score:$('homeScore').value,away_score:$('awayScore').value,evidence:$('evidence').value});say('resultMsg','Result saved. Public standings have updated.');$('homeScore').value='';$('awayScore').value='';$('evidence').value='';await loadPublic();await loadAdmin();}catch(e){say('resultMsg','⚠️ '+e.message);}};
   $('savePlayerStats').onclick=async()=>{try{const body={action:'save-player-stats',match_id:$('statMatch').value,player_registration_id:$('statPlayer').value};['points','rebounds','assists','steals','blocks','turnovers','fouls','minutes'].forEach(k=>body[k]=$('stat_'+k).value);await adminApi(body);say('statsMsg','Player stats saved for this game.');await loadPublic();}catch(e){say('statsMsg','⚠️ '+e.message);}};
-  loadPublic();
+  async function ownerApi(body){return adminApi(body);}
+  async function refreshOwner(){
+    const {data:{session}}=await sb.auth.getSession();
+    const status=$('ownerAuthStatus'),panel=$('ownerDashboard');
+    if(!session){status.textContent='Not signed in';panel.style.display='none';return;}
+    const meta=session.user.user_metadata||{};status.textContent='Signed in as '+(meta.full_name||meta.name||meta.user_name||'Discord user');
+    try{const d=await ownerApi({action:'owner-data'});state.ownedTeams=d.teams||[];state.ownerRoster=d.roster||[];state.availablePlayers=d.availablePlayers||[];panel.style.display='block';renderOwner();}
+    catch(e){status.textContent='Sign-in active · '+e.message;panel.style.display='none';}
+  }
+  function renderOwner(){
+    $('ownerTeams').innerHTML=state.ownedTeams.length?state.ownedTeams.map(t=>`<div class="epl-owner-row"><div><b>${esc(t.team_name)}</b><small>${esc(t.short_code)} · ${esc(t.status)}${t.status==='pending'?' · Awaiting approval':''}</small></div></div>`).join(''):'<p class="muted">No teams are linked to this Discord account yet. Register a team above.</p>';
+    const approved=state.ownedTeams.filter(t=>t.status==='approved');if(!approved.length){$('ownerRoster').innerHTML='';return;}
+    const teamId=approved[0].id,roster=state.ownerRoster.filter(p=>p.team_id===teamId);
+    const starters=roster.filter(p=>p.roster_role==='starter').length,subs=roster.length-starters;
+    $('ownerRoster').innerHTML=`<h3 style="margin-top:18px">${esc(approved[0].team_name)} · Squad (${roster.length}/15)</h3><p class="tiny">${starters}/5 starters · ${subs}/10 substitutes</p>`+
+      roster.map(p=>`<div class="epl-owner-row"><div><b>${esc(p.display_name)}</b><small>@${esc(p.roblox_username)} · ${esc(p.roster_role||'starter')}</small></div><div class="epl-owner-actions"><button class="btn" data-role="${p.id}" data-team="${teamId}" data-next="${p.roster_role==='starter'?'substitute':'starter'}">Make ${p.roster_role==='starter'?'sub':'starting'} player</button><button class="btn" data-remove="${p.id}" data-team="${teamId}">Remove</button></div></div>`).join('')+
+      `<div class="formgrid" style="margin-top:14px"><div class="field"><label>Add approved player</label><select id="ownerAddPlayer"><option value="">Select player</option>${state.availablePlayers.map(p=>`<option value="${p.id}">${esc(p.display_name)} (@${esc(p.roblox_username)})</option>`).join('')}</select></div><div class="field"><label>Squad role</label><select id="ownerAddRole"><option value="starter">Starter</option><option value="substitute">Substitute</option></select></div></div><button class="btn primary" id="ownerAddBtn" data-team="${teamId}">Add player to squad</button><p id="ownerMsg" class="tiny"></p>`;
+    document.querySelectorAll('[data-remove]').forEach(b=>b.onclick=async()=>{if(!confirm('Remove this player from your squad?'))return;try{await ownerApi({action:'owner-remove-player',team_id:b.dataset.team,player_id:b.dataset.remove});await refreshOwner();await loadPublic();}catch(e){say('ownerMsg','⚠️ '+e.message);}});
+    document.querySelectorAll('[data-role]').forEach(b=>b.onclick=async()=>{try{await ownerApi({action:'owner-set-role',team_id:b.dataset.team,player_id:b.dataset.role,roster_role:b.dataset.next});await refreshOwner();}catch(e){say('ownerMsg','⚠️ '+e.message);}});
+    $('ownerAddBtn').onclick=async()=>{try{await ownerApi({action:'owner-add-player',team_id:teamId,player_id:$('ownerAddPlayer').value,roster_role:$('ownerAddRole').value});await refreshOwner();await loadPublic();}catch(e){say('ownerMsg','⚠️ '+e.message);}};
+  }
+  $('discordOwnerLogin').onclick=async()=>{const {error}=await sb.auth.signInWithOAuth({provider:'discord',options:{redirectTo:window.location.origin+window.location.pathname,scopes:'identify email'}});if(error)say('ownerAuthStatus','Discord sign-in failed: '+error.message);};
+  $('ownerSignOut').onclick=async()=>{await sb.auth.signOut();await refreshOwner();};
+  sb.auth.onAuthStateChange(()=>setTimeout(refreshOwner,0));
+  $('teamRegistrationForm').addEventListener('submit',e=>{e.preventDefault();formSubmit('teamRegistrationForm','register-team','teamRegistrationMsg',true)});
+  loadPublic(); refreshOwner();
 })();
