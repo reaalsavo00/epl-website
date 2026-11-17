@@ -174,7 +174,25 @@ th{background:#edf2ff!important;color:#183575!important;font-size:10px!important
 
 /* Live database connection indicator */
 .data-connection{display:flex;align-items:center;gap:9px;min-height:36px;margin:-4px 0 14px;padding:8px 12px;border:1px solid #dfe6f2;border-radius:9px;background:#fff;color:#66748d;font-size:10px;font-weight:750;letter-spacing:.02em}.data-dot{width:8px;height:8px;flex:0 0 8px;border-radius:50%;background:#d6a52b;box-shadow:0 0 0 3px #d6a52b20}.data-connection[data-state="ok"] .data-dot{background:#16845b;box-shadow:0 0 0 3px #16845b20}.data-connection[data-state="error"]{background:#fff8f7;border-color:#f0d4d4;color:#9d3440}.data-connection[data-state="error"] .data-dot{background:#bd3448;box-shadow:0 0 0 3px #bd344820}.data-connection button{margin-left:auto;border:1px solid #d8e0ef;border-radius:6px;background:#f7f9fd;color:#24427f;padding:5px 9px;font-size:9px;font-weight:900;cursor:pointer}.data-connection button:hover{background:#edf2ff}
-</style></head>
+</style>
+<style id="epl-typography-avatar-tune">
+/* Refined sizing and stronger team/player typography */
+.epl-avatar-wrap{width:32px!important;height:32px!important;min-width:32px!important;flex:0 0 32px!important;overflow:hidden!important;border-radius:50%!important}
+.epl-avatar{width:32px!important;height:32px!important;max-width:32px!important;max-height:32px!important;object-fit:cover!important;border-radius:50%!important}
+.epl-avatar-fallback{width:32px!important;height:32px!important;font-size:11px!important;font-weight:900!important}
+.team-roster-avatar,.owner-avatar{width:30px!important;height:30px!important;max-width:30px!important;max-height:30px!important}
+.home-fixture-list .match-side .epl-team-logo,.home-fixture-list .match-side .teammark{width:38px!important;height:38px!important;max-width:38px!important;max-height:38px!important;padding:2px!important}
+.team-card-heading h3{font-size:19px!important;font-weight:950!important;letter-spacing:-.02em!important}
+.team-card-heading span{font-size:13px!important;font-weight:800!important;color:#35466d!important}
+.team-card-footer{font-size:12px!important;font-weight:850!important;color:#35466d!important}
+.team-card-record span{font-weight:850!important}
+.epl-player-info>b,.team-profile-player-copy>b{font-size:16px!important;font-weight:950!important;line-height:1.25!important;color:#152d68!important;letter-spacing:-.01em!important}
+.epl-player-info>span,.team-profile-player-copy .tiny{font-size:12px!important;font-weight:750!important}
+.epl-player-info>small{font-size:11px!important;font-weight:750!important}
+.team-profile-player-info{display:flex;align-items:center;gap:10px;min-width:0}
+@media(max-width:520px){.epl-avatar-wrap,.epl-avatar{width:28px!important;height:28px!important;min-width:28px!important;max-width:28px!important;max-height:28px!important;flex-basis:28px!important}.home-fixture-list .match-side .epl-team-logo,.home-fixture-list .match-side .teammark{width:34px!important;height:34px!important;max-width:34px!important;max-height:34px!important}.team-card-heading h3{font-size:17px!important}.epl-player-info>b,.team-profile-player-copy>b{font-size:15px!important}}
+</style>
+</head>
 <body>
 <header class="topbar"><div class="nav">
 <div class="brand"><img alt="European Pro League logo" class="brand-logo" src="epl-logo.png"/><div><strong>EUROPEAN PRO LEAGUE</strong><small>EUROPE'S COURT</small></div></div>
