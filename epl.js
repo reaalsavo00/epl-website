@@ -33,18 +33,18 @@
   }
   async function getAvatar(username){
     const name=String(username||'').trim();
-    if(!name)return '';
+    if(!name)return null;
     const cacheKey=name.toLowerCase();
     if(avatarCache.has(cacheKey))return avatarCache.get(cacheKey);
     try {
-      // Search is GET-based so it works through the public bridge. Match the
-      // exact Roblox username, not a similar result or display name.
+      // Resolve the exact Roblox username first, then request the FULL avatar
+      // (not avatar-headshot) so the player's whole character is displayed.
       const searchUrl='https://users.roblox.com/v1/users/search?'+new URLSearchParams({keyword:name,limit:'10'}).toString();
       const userData=await robloxPublicGet(searchUrl);
       const matchedUser=(userData.data||[]).find(user=>String(user.name||'').toLowerCase()===cacheKey);
       const userId=matchedUser?.id;
-      if(!userId)return '';
-      const thumbUrl='https://thumbnails.roblox.com/v1/users/avatar-headshot?'+new URLSearchParams({userIds:String(userId),size:'150x150',format:'Png',isCircular:'false'}).toString();
+      if(!userId)return null;
+      const thumbUrl='https://thumbnails.roblox.com/v1/users/avatar?'+new URLSearchParams({userIds:String(userId),size:'420x420',format:'Png',isCircular:'false'}).toString();
       let imageUrl='';
       for(let attempt=0;attempt<3&&!imageUrl;attempt++){
         const thumbData=await robloxPublicGet(thumbUrl);
@@ -52,16 +52,24 @@
         imageUrl=thumb?.imageUrl||'';
         if(!imageUrl&&attempt<2)await new Promise(resolve=>setTimeout(resolve,650));
       }
-      if(imageUrl)avatarCache.set(cacheKey,imageUrl);
-      return imageUrl;
-    } catch(error) { console.warn('Roblox avatar could not be loaded for',name,error); return ''; }
+      const result={userId:String(userId),imageUrl};
+      avatarCache.set(cacheKey,result);
+      return result;
+    } catch(error) {
+      console.warn('Roblox full avatar could not be loaded for',name,error);
+      return null;
+    }
   }
   async function hydratePeople(people){
-    const unique=[...new Set((people||[]).filter(p=>p&&!p.avatar_url&&!p._avatarTried))];
+    const unique=[...new Set((people||[]).filter(p=>p&&p.roblox_username&&!p._avatarTried))];
     await Promise.all(unique.map(async p=>{
       p._avatarTried=true;
-      p.avatar_url=await getAvatar(p.roblox_username);
-      // Let a later owner refresh retry transient proxy/API failures.
+      const avatar=await getAvatar(p.roblox_username);
+      if(avatar){
+        p.roblox_user_id=avatar.userId;
+        p.avatar_url=avatar.imageUrl;
+      }
+      // Retry on the next refresh if Roblox or the CORS bridge is unavailable.
       if(!p.avatar_url)p._avatarTried=false;
     }));
   }
@@ -121,6 +129,22 @@
   $('playerRegistrationForm').addEventListener('submit',e=>{e.preventDefault();formSubmit('playerRegistrationForm','register-player','playerRegistrationMsg')});
   $('freeAgentRegistrationForm').addEventListener('submit',e=>{e.preventDefault();formSubmit('freeAgentRegistrationForm','register-free-agent','freeAgentRegistrationMsg')});
   function options(el,items,label){$(el).innerHTML=`<option value="">${label}</option>`+items.map(x=>`<option value="${x.id}">${esc(x.team_name||x.display_name)}</option>`).join('');}
+  function renderStatPlayerOptions(){
+    const matchId=$('statMatch')?.value||'';
+    const match=state.matches.find(m=>String(m.id)===String(matchId));
+    const select=$('statPlayer');
+    if(!select)return;
+    if(!match){
+      select.innerHTML='<option value="">Select a match first</option>';
+      return;
+    }
+    const teamIds=new Set([String(match.home_team_id),String(match.away_team_id)]);
+    const eligible=state.players.filter(p=>p.team_id!=null&&teamIds.has(String(p.team_id)));
+    const unique=[...new Map(eligible.map(p=>[String(p.id),p])).values()];
+    select.innerHTML='<option value="">Select player from this match</option>'+
+      unique.map(p=>`<option value="${esc(p.id)}">${esc(p.display_name||p.roblox_username)} · ${esc(team(p.team_id).team_name)}</option>`).join('');
+    if(!unique.length)select.innerHTML='<option value="">No approved players linked to either team</option>';
+  }
   function renderPending(){
     const group=(items,type)=>items.length?items.map(x=>`<div class="epl-pending-row"><div><b>${esc(x.team_name||x.display_name)}</b><small>${type==='team'?`${esc(x.short_code)} · ${esc(x.captain_name)} · ${esc(x.captain_discord)}`:`@${esc(x.roblox_username)}${x.discord_username?' · '+esc(x.discord_username):''}`}</small>${x.logo_url?`<img class="epl-pending-logo" src="${esc(x.logo_url)}" alt="Team logo">`:''}</div><div class="formactions"><button class="btn primary" data-review="${type}" data-id="${x.id}" data-status="approved">Approve</button><button class="btn" data-review="${type}" data-id="${x.id}" data-status="rejected">Reject</button></div></div>`).join(''):'<div class="empty">No pending applications.</div>';
     $('pendingTeams').innerHTML=group(state.pendingTeams,'team');$('pendingPlayers').innerHTML=group(state.pendingPlayers,'player');$('pendingAgents').innerHTML=group(state.pendingAgents,'agent');
@@ -129,7 +153,8 @@
   async function loadAdmin(){try{const d=await adminApi({action:'admin-data'});state.pendingTeams=d.pendingTeams||[];state.pendingPlayers=d.pendingPlayers||[];state.pendingAgents=d.pendingAgents||[];renderAdmin();}catch(e){say('adminDataMsg','⚠️ '+e.message);}}
   function renderAdmin(){
     options('matchHome',state.teams,'Select home team');options('matchAway',state.teams,'Select away team');options('resultMatch',state.matches.filter(m=>m.status==='upcoming'),'Select fixture');$('resultMatch').querySelectorAll('option:not(:first-child)').forEach(o=>{const m=state.matches.find(x=>x.id===o.value);if(m)o.textContent=matchName(m);});
-    const players=state.players;options('statPlayer',players,'Select player');$('statMatch').innerHTML='<option value="">Select match</option>'+state.matches.map(m=>`<option value="${m.id}">${esc(matchName(m))} · ${esc(m.status)}</option>`).join('');
+    $('statMatch').innerHTML='<option value="">Select match</option>'+state.matches.map(m=>`<option value="${m.id}">${esc(matchName(m))} · ${esc(m.status)}</option>`).join('');
+    renderStatPlayerOptions();
     renderPending();
     if($('manageTeam'))$('manageTeam').innerHTML='<option value="">Select team</option>'+state.teams.map(t=>`<option value="${t.id}">${esc(t.team_name)}</option>`).join('');
     if($('manageMatch'))$('manageMatch').innerHTML='<option value="">Select fixture</option>'+state.matches.map(m=>`<option value="${m.id}">${esc(matchName(m))} · ${esc(m.status)}</option>`).join('');
@@ -138,7 +163,14 @@
   window.loadEplAdmin=async()=>{await loadPublic();await loadAdmin();};
   $('createFixture').onclick=async()=>{try{await adminApi({action:'create-match',home_team_id:$('matchHome').value,away_team_id:$('matchAway').value,scheduled_at:$('matchDate').value?new Date($('matchDate').value).toISOString():null,match_note:$('matchNote').value});say('matchMsg','Fixture saved to the shared EPL database.');$('matchDate').value='';$('matchNote').value='';await loadPublic();await loadAdmin();}catch(e){say('matchMsg','⚠️ '+e.message);}};
   $('saveResult').onclick=async()=>{try{await adminApi({action:'save-result',match_id:$('resultMatch').value,home_score:$('homeScore').value,away_score:$('awayScore').value,evidence:$('evidence').value});say('resultMsg','Result saved. Public standings have updated.');$('homeScore').value='';$('awayScore').value='';$('evidence').value='';await loadPublic();await loadAdmin();}catch(e){say('resultMsg','⚠️ '+e.message);}};
-  $('savePlayerStats').onclick=async()=>{try{const body={action:'save-player-stats',match_id:$('statMatch').value,player_registration_id:$('statPlayer').value};['points','rebounds','assists','steals','blocks','turnovers','fouls','minutes'].forEach(k=>body[k]=$('stat_'+k).value);await adminApi(body);say('statsMsg','Player stats saved for this game.');await loadPublic();}catch(e){say('statsMsg','⚠️ '+e.message);}};
+  $('statMatch')?.addEventListener('change',renderStatPlayerOptions);
+  $('savePlayerStats').onclick=async()=>{try{
+    if(!$('statMatch').value)throw new Error('Select a match first.');
+    if(!$('statPlayer').value)throw new Error('Select a player from one of the teams in this match.');
+    const body={action:'save-player-stats',match_id:$('statMatch').value,player_registration_id:$('statPlayer').value};
+    ['points','rebounds','assists','steals','blocks','turnovers','fouls','minutes'].forEach(k=>body[k]=$('stat_'+k).value);
+    await adminApi(body);say('statsMsg','Player stats saved for this game.');await loadPublic();
+  }catch(e){say('statsMsg','⚠️ '+e.message);}};
   $('manageTeam')?.addEventListener('change',()=>{const t=state.teams.find(x=>x.id===$('manageTeam').value);if(!t)return;$('editTeamName').value=t.team_name||'';$('editTeamCode').value=t.short_code||'';$('editTeamRegion').value=t.region||'';$('editTeamCaptain').value=t.captain_name||'';});
   $('saveTeamDetails')?.addEventListener('click',async()=>{try{await adminApi({action:'admin-team-update',team_id:$('manageTeam').value,team_name:$('editTeamName').value,short_code:$('editTeamCode').value,region:$('editTeamRegion').value,captain_name:$('editTeamCaptain').value});say('teamAdminMsg','Team details updated.');await loadPublic();await loadAdmin();}catch(e){say('teamAdminMsg','⚠️ '+e.message);}});
   $('publishNews')?.addEventListener('click',async()=>{try{await adminApi({action:'admin-publish-news',title:$('newsTitle').value,body:$('newsBody').value,category:$('newsCategory').value});$('newsTitle').value='';$('newsBody').value='';say('newsAdminMsg','Announcement published.');await loadPublic();}catch(e){say('newsAdminMsg','⚠️ '+e.message);}});
