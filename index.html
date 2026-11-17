@@ -1,9 +1,10 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#17318f">
-<title>European Pro League | The European Court</title>
+<meta charset="utf-8"/><meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta content="#17318f" name="theme-color"/>
+<title>European Pro League | Official League Hub</title>
 <style>
 :root{--bg:#f3f5fc;--panel:#fff;--panel2:#eef2ff;--line:#dce3f3;--blue:#17318f;--blue2:#2448bd;--gold:#ffe500;--text:#101b45;--muted:#657196;--green:#16845b;--red:#c23b4b;--shadow:0 16px 38px rgba(23,49,143,.09)}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Arial,sans-serif}body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.23;background-image:radial-gradient(#17318f 0.65px,transparent .65px);background-size:17px 17px;mask-image:linear-gradient(to bottom,black,transparent 70%)}button,input,select,textarea{font:inherit}button{cursor:pointer}
@@ -22,8 +23,54 @@
 @media(max-width:520px){.matchup{grid-template-columns:minmax(0,1fr) 62px minmax(0,1fr)!important;gap:5px;padding:12px 7px}.match-side{gap:5px;font-size:10px}.match-side b{font-size:10px}.match-side .epl-team-logo,.match-side .teammark{width:32px;height:32px}.match-centre{min-width:0;width:62px}.score{font-size:16px;min-width:54px}.match-centre .pill{font-size:8px;padding:4px 5px}.team-profile-player{grid-template-columns:1fr}.team-profile-player-stats{justify-content:flex-start}.team-profile-match{flex-direction:column;gap:4px}.stats{gap:9px}.stat{padding:13px}.stat strong{font-size:26px}.hero-mark{right:-13%;width:50%;opacity:.2}.hero{min-height:390px}.sectionhead h2{font-size:23px}}
 
 
-/* Desktop identity shift: fixed club-style navigation rail */
-@media(min-width:1051px){.topbar{position:fixed;left:0;top:0;bottom:0;width:258px;height:100vh;border-bottom:0;border-right:5px solid var(--gold);overflow-y:auto}.nav{height:100%;padding:27px 18px;display:flex;flex-direction:column;align-items:stretch;gap:25px}.brand{min-width:0;flex:none;padding:4px 5px 22px;border-bottom:1px solid #ffffff30}.brand-logo{width:64px;height:64px}.brand strong{font-size:11px;line-height:1.6}.navlinks{display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:7px;flex:none}.navlinks button{width:100%;text-align:left;padding:13px 14px;border-left:3px solid transparent;border-radius:2px;font-size:12px}.navlinks button.active,.navlinks button:hover{border-left-color:var(--gold);box-shadow:none}.adminbtn{margin-top:auto;padding:14px;text-align:center}.wrap{max-width:none;margin-left:258px;padding:38px clamp(22px,4vw,64px) 90px}.footer{margin-left:258px}}
+
+/* === EPL HOME PAGE: FULL STRUCTURAL REDESIGN === */
+:root{--home-ink:#101a35;--home-blue:#17318f;--home-blue-bright:#2449bd;--home-gold:#e5bd39;--home-paper:#fff;}
+#page-home{color:var(--home-ink)}
+#page-home .home-kicker{display:flex;align-items:center;gap:12px;margin:2px 0 18px;font-size:9px;font-weight:950;letter-spacing:.19em;color:#526080}
+.home-kicker-dot{width:8px;height:8px;border-radius:50%;background:var(--home-gold);box-shadow:0 0 0 4px #e5bd3925}
+.home-kicker-line{height:1px;background:#dce2ef;flex:1;max-width:90px}.home-season-tag{margin-left:auto;background:#f6edcf;color:#735a10;padding:7px 10px;font-size:9px;letter-spacing:.12em}
+#page-home .home-lead{display:grid;grid-template-columns:1.05fr .95fr;min-height:390px;background:#fff;border:1px solid #e2e7f1;box-shadow:0 16px 45px #172b6510;overflow:hidden}
+.home-lead-copy{padding:clamp(30px,5vw,68px);display:flex;flex-direction:column;align-items:flex-start;justify-content:center}
+.home-overline{font-size:10px;font-weight:950;letter-spacing:.24em;color:var(--home-blue);margin-bottom:18px}
+#page-home .home-lead h1{font-size:clamp(48px,7vw,94px);line-height:.86;letter-spacing:-.075em;font-weight:1000;color:#111a32;margin:0;text-transform:uppercase}
+#page-home .home-lead h1 span{color:var(--home-blue)}
+.home-lead-copy p{max-width:430px;color:#68738d;font-size:14px;line-height:1.8;margin:23px 0 0}
+.home-lead-actions{display:flex;align-items:center;gap:25px;flex-wrap:wrap;margin-top:28px}
+.home-button{border:0;padding:14px 18px;font-size:10px;font-weight:950;letter-spacing:.09em;cursor:pointer;display:inline-flex;gap:24px;align-items:center;transition:.18s}
+.home-button:hover{transform:translateY(-3px);box-shadow:0 8px 18px #14265b25}
+.home-button-blue{background:var(--home-blue);color:#fff}.home-button-gold{background:var(--home-gold);color:#151d35}
+.home-button span{font-size:17px;line-height:10px}.home-text-link{background:none;border:0;color:var(--home-blue);font-size:10px;font-weight:950;letter-spacing:.08em;cursor:pointer;padding:10px 0}.home-text-link span{font-size:16px;margin-left:7px}
+.home-lead-art{position:relative;min-height:390px;background:var(--home-blue);color:white;padding:24px 28px;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between}
+.home-lead-art:before{content:"";position:absolute;inset:0;background:linear-gradient(135deg,#ffffff08 25%,transparent 25% 50%,#ffffff08 50% 75%,transparent 75%);background-size:54px 54px;opacity:.55}
+.court-label,.court-caption{position:relative;z-index:2}.court-label{font-size:10px;font-weight:950;letter-spacing:.2em}.court-label span{color:var(--home-gold);padding:0 7px}
+.court-graphic{position:absolute;inset:60px 28px 58px;border:2px solid #ffffff65;border-radius:3px;overflow:hidden;opacity:.9}
+.court-midline{position:absolute;top:0;bottom:0;left:50%;border-left:2px solid #ffffff65}.court-circle{position:absolute;width:145px;height:145px;border:2px solid #ffffff65;border-radius:50%;left:50%;top:50%;transform:translate(-50%,-50%)}
+.court-key{position:absolute;top:27%;height:46%;width:17%;border:2px solid #ffffff65}.court-key-left{left:0;border-left:0}.court-key-right{right:0;border-right:0}
+.court-arc{position:absolute;width:44%;height:82%;border:2px solid #ffffff65;border-radius:50%;top:9%}.court-arc-left{left:-28%}.court-arc-right{right:-28%}
+.home-main-crest{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:clamp(108px,15vw,154px);height:clamp(108px,15vw,154px);object-fit:contain;padding:9px;background:#fff;border:5px solid var(--home-gold);border-radius:24px;box-shadow:0 14px 38px #07163855,0 0 0 12px #ffffff20;z-index:3}
+.home-main-crest:hover{transform:translate(-50%,-50%) scale(1.035)}
+.court-caption{display:grid;gap:6px}.court-caption span{font-size:8px;letter-spacing:.2em;color:#d9e2ff;font-weight:900}.court-caption strong{font-size:12px;letter-spacing:.12em}
+#page-home .home-metrics{display:grid;grid-template-columns:1.3fr repeat(3,1fr) .8fr;align-items:center;background:#f5f7fc;border-bottom:1px solid #dfe5f0;margin:0 0 48px;padding:18px 24px;gap:15px}
+.home-metric-label{font-size:9px;line-height:1.6;letter-spacing:.16em;color:#77829c;font-weight:950}.home-metric{display:flex;align-items:baseline;gap:10px;border-left:1px solid #d8deeb;padding-left:20px}.home-metric strong{font-size:30px;line-height:1;color:var(--home-blue);font-weight:1000;letter-spacing:-.06em}.home-metric span,.home-metric-season span{font-size:8px;color:#77829c;letter-spacing:.13em;font-weight:950}.home-metric-season{display:grid;justify-items:end;gap:3px;border-left:1px solid #d8deeb;padding-left:18px}.home-metric-season strong{font-size:20px;color:#a17a0d}
+#page-home .home-section-heading{display:flex;align-items:end;justify-content:space-between;gap:18px;margin:0 0 17px;padding:0 0 14px;border-bottom:2px solid var(--home-blue)}
+.home-section-index{display:block;font-size:9px;font-weight:950;letter-spacing:.18em;color:#9b7a19;margin-bottom:7px}
+#page-home .home-section-heading h2{font-size:clamp(24px,3vw,36px);letter-spacing:-.055em;line-height:1;margin:0;color:#111a32;font-weight:1000}
+#page-home .home-section-heading p{font-size:11px;color:#7a849c;margin:8px 0 0;line-height:1.5}
+.home-outline-link{background:transparent;border:1px solid #cbd3e3;padding:11px 13px;color:var(--home-blue);font-size:9px;letter-spacing:.1em;font-weight:950;cursor:pointer;white-space:nowrap}.home-outline-link span{font-size:14px;margin-left:12px}
+.home-matchday-layout{display:grid;grid-template-columns:1.35fr .85fr;gap:18px;margin-bottom:50px;align-items:start}
+.home-fixture-feature,.home-table-feature{background:#fff;border:1px solid #e0e5ef;box-shadow:0 12px 30px #1528580a;min-width:0}
+.home-panel-top{display:flex;justify-content:space-between;align-items:center;padding:14px 17px;border-bottom:1px solid #e7ebf3;font-size:9px;letter-spacing:.14em;color:#4e5a77;font-weight:950}.home-live-mark{font-size:8px;color:#7c86a0}.home-live-mark i{display:inline-block;width:6px;height:6px;background:var(--home-gold);border-radius:50%;margin-right:6px}
+#page-home .home-fixture-list{padding:0 18px}.home-fixture-list .match{padding:14px 0;border-bottom:1px solid #edf0f6}.home-fixture-list .match:last-child{border:0}.home-fixture-list .matchup{margin-top:8px;padding:14px 12px;background:#f7f8fc;border:1px solid #e9edf5;grid-template-columns:minmax(0,1fr) 90px minmax(0,1fr)!important}.home-fixture-list .match-side .epl-team-logo,.home-fixture-list .match-side .teammark{width:37px;height:37px;border:1px solid var(--home-gold);font-size:9px}.home-fixture-list .match-side b{font-size:11px}.home-fixture-list .score{font-size:20px}.home-fixture-list .date{font-size:8px}
+.home-table-feature{padding-bottom:0}.home-table-title{display:flex;align-items:center;justify-content:space-between;padding:18px 17px 9px}.home-table-title span{font-size:8px;color:#9a7a1b;letter-spacing:.16em;font-weight:950}.home-table-title h3{font-size:17px;margin:5px 0 0;color:#121d3a;letter-spacing:-.04em}.home-table-title button{width:33px;height:33px;border:0;background:#f3f5fb;color:var(--home-blue);font-size:19px;cursor:pointer}
+#page-home #homeStandings{padding:0 14px 12px;box-shadow:none;border:0;background:white}#page-home #homeStandings table{font-size:10px}#page-home #homeStandings th{background:#f1f4fa;color:#77819a;padding:10px 8px;font-size:8px}#page-home #homeStandings td{padding:10px 8px}#page-home #homeStandings tbody tr:nth-child(even){background:#fafbfe}#page-home #homeStandings .teammark{width:23px;height:23px;border-width:1px;font-size:8px;margin-right:5px}
+.home-table-cta{width:calc(100% - 28px);margin:0 14px 14px;padding:13px;background:var(--home-blue);color:white;border:0;text-align:left;font-size:8px;letter-spacing:.12em;font-weight:950;cursor:pointer}.home-table-cta span{float:right;font-size:14px}
+#page-home .home-news-heading{margin-top:0}.home-news-layout{display:grid;grid-template-columns:1.6fr .7fr;gap:18px;margin-bottom:35px}.home-news-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-content:start}.home-news-grid .newsitem{padding:20px;background:white;border:1px solid #e2e7f0;min-height:145px}.home-news-grid .newsitem .pill{background:#f8f0d7;border-color:#eee1b6;color:#806419}.home-news-grid .newsitem h4{font-size:16px;color:#14203f;margin:12px 0 7px}.home-news-grid .newsitem p{font-size:11px;line-height:1.65}
+.home-join-panel{position:relative;overflow:hidden;background:#111a32;color:white;padding:25px;min-height:220px}.home-join-panel .home-section-index{color:var(--home-gold)}.home-join-panel h3{position:relative;z-index:1;font-size:32px;line-height:.92;letter-spacing:-.06em;margin:15px 0;color:white}.home-join-panel p{position:relative;z-index:1;font-size:11px;line-height:1.7;color:#c1c9dd;max-width:250px}.home-join-panel .home-button{position:relative;z-index:2;margin-top:10px}.home-join-watermark{position:absolute;right:-12px;bottom:-43px;font-size:145px;line-height:1;font-weight:1000;color:#ffffff0a;letter-spacing:-.12em}
+.home-bottom-banner{display:flex;align-items:center;gap:18px;padding:18px 20px;background:#f3f5fa;border-left:4px solid var(--home-gold)}.home-bottom-banner span{font-size:8px;letter-spacing:.16em;color:#73809d;font-weight:950}.home-bottom-banner strong{font-size:11px;letter-spacing:.07em;color:#14203f;flex:1}.home-bottom-banner button{border:0;background:none;color:var(--home-blue);font-size:8px;font-weight:950;letter-spacing:.1em;cursor:pointer}
+@media(max-width:900px){#page-home .home-lead{grid-template-columns:1fr}.home-lead-art{min-height:270px}.home-matchday-layout{grid-template-columns:1fr}.home-news-layout{grid-template-columns:1fr}.home-join-panel{min-height:200px}}
+@media(max-width:620px){#page-home .home-kicker{font-size:7px;gap:7px}.home-season-tag{font-size:7px}.home-lead-copy{padding:30px 22px}#page-home .home-lead h1{font-size:54px}.home-lead-art{min-height:235px}.court-graphic{inset:48px 20px 48px}.court-circle{width:95px;height:95px}.court-ball{width:55px;height:55px;font-size:25px}#page-home .home-metrics{grid-template-columns:repeat(2,1fr);padding:16px;margin-bottom:36px;gap:14px}.home-metric-label{grid-column:1/-1}.home-metric{padding-left:12px}.home-metric strong{font-size:25px}.home-metric-season{justify-items:start;padding-left:12px}.home-section-heading{align-items:flex-start!important;flex-direction:column}.home-outline-link{align-self:flex-start}.home-news-grid{grid-template-columns:1fr}.home-bottom-banner{align-items:flex-start;flex-direction:column;gap:9px}.home-bottom-banner strong{font-size:10px}}
+
 </style>
 <style id="epl-royal-blue-rebrand">
 :root{--bg:#091747;--panel:#10235f;--panel2:#172f7b;--line:#304a9a;--blue:#17358f;--blue2:#3156c7;--gold:#ffe600;--text:#fff;--muted:#c0cbed;--green:#63e6ad}
@@ -106,239 +153,277 @@ th{background:#142440;color:#dce9ff}th,td{border-bottom-color:#26344b}tbody tr:n
 @media(max-width:800px){.topbar{background:#070b13}.navlinks{scrollbar-color:#285a9b #0b111c}}
 
 </style>
-</head>
+<style>
+/* EPL 2026 — complete editorial redesign */
+:root{--bg:#f5f7fc;--panel:#fff;--panel2:#edf2ff;--line:#dce3f0;--blue:#173b9b;--blue2:#2457d6;--gold:#d9ad32;--text:#111a2e;--muted:#68748b;--green:#16845b;--red:#bd3448;--shadow:0 12px 34px rgba(20,43,92,.08)}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.55}body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;opacity:.3;background:radial-gradient(circle at 12% 0%,#e6edff 0,transparent 30%),radial-gradient(circle at 90% 15%,#fff5d8 0,transparent 25%)}
+.topbar{position:sticky!important;top:0!important;left:auto!important;right:auto!important;bottom:auto!important;width:100%!important;height:auto!important;z-index:1000;background:rgba(255,255,255,.96)!important;border:0!important;border-bottom:1px solid #dce3f0!important;box-shadow:0 5px 24px rgba(18,39,83,.07)!important;overflow:visible!important;backdrop-filter:blur(16px)}
+.nav{width:min(1440px,100%);min-height:82px;margin:0 auto;padding:12px clamp(16px,3vw,42px)!important;display:flex!important;flex-direction:row!important;align-items:center!important;gap:22px!important}
+.brand{display:flex;align-items:center;gap:11px;min-width:220px!important;flex:0 0 auto!important;padding:0!important;border:0!important}.brand-logo{width:43px!important;height:43px!important;max-width:43px!important;max-height:43px!important;object-fit:contain;border:0!important;border-radius:10px!important;box-shadow:none!important}.brand strong{display:block;color:#142b68;font-size:12px!important;letter-spacing:.09em;font-weight:950;line-height:1.2}.brand small{display:block;color:#a17a16!important;font-size:9px;letter-spacing:.2em;font-weight:850;margin-top:4px}
+.navlinks{display:flex!important;flex:1 1 auto!important;flex-direction:row!important;align-items:center!important;justify-content:center!important;gap:4px!important;order:0!important;min-width:0;overflow-x:auto;scrollbar-width:none}.navlinks::-webkit-scrollbar{display:none}.navlinks button{white-space:nowrap;flex:0 0 auto;padding:10px 11px!important;border:0!important;border-radius:8px!important;background:transparent!important;color:#43516d!important;font-size:11px!important;font-weight:800;letter-spacing:.01em;transition:.18s}.navlinks button:hover{background:#edf2ff!important;color:var(--blue)!important;box-shadow:none!important}.navlinks button.active{background:var(--blue)!important;color:white!important;box-shadow:0 5px 14px #173b9b25!important}.adminbtn{flex:0 0 auto;margin:0!important;padding:10px 15px!important;border-radius:8px!important;background:#fff!important;color:var(--blue)!important;border:1px solid #cbd6ec!important;font-size:11px;font-weight:900}
+.wrap{width:min(1380px,100%);max-width:1380px!important;margin:0 auto!important;padding:36px clamp(16px,3vw,42px) 76px!important}.page{animation:pageIn .28s ease both}@keyframes pageIn{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+.hero{position:relative;isolation:isolate;display:grid;grid-template-columns:minmax(0,1.5fr) minmax(180px,.55fr);align-items:center;gap:28px;min-height:360px;padding:clamp(28px,5vw,64px)!important;border:1px solid #d9e1f1!important;border-radius:22px!important;overflow:hidden;background:linear-gradient(115deg,#fff 0%,#fff 55%,#eef3ff 100%)!important;box-shadow:var(--shadow)!important}.hero:before{content:"";position:absolute;z-index:-1;right:-90px;top:-170px;width:470px;height:470px;border:1px solid #d8e2f7;border-radius:50%;box-shadow:0 0 0 38px #f5f7fc,0 0 0 39px #e5ebf7,0 0 0 82px #f8faff,0 0 0 83px #e5ebf7}.hero:after{content:"EPL";position:absolute;right:25%;bottom:-65px;font-size:210px;font-weight:1000;letter-spacing:-.1em;color:#173b9b08;z-index:-1}.hero-copy{max-width:760px!important}.eyebrow{display:flex;align-items:center;gap:9px;color:#a17a16!important;font-size:10px!important;font-weight:950;letter-spacing:.18em;text-transform:uppercase}.eyebrow:before{content:"";width:22px;height:3px;background:var(--gold);border-radius:9px;box-shadow:none!important}.hero h1{margin:16px 0 12px;font-size:clamp(46px,6vw,82px)!important;line-height:.94;letter-spacing:-.065em;color:#142b68!important;font-weight:1000}.hero h1 span{color:var(--blue2)!important}.hero p{max-width:610px;color:#66738b!important;font-size:15px!important;line-height:1.8}.hero-mark{position:relative!important;right:auto!important;width:100%!important;max-width:220px!important;justify-self:center;opacity:1!important}.hero-mark img{display:block;width:100%;max-width:200px;max-height:200px;object-fit:contain;border:0!important;border-radius:18px!important;box-shadow:0 16px 36px #173b9b20!important}.actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:22px}.btn{border:1px solid #d6deed!important;background:#fff!important;color:#263b6d!important;border-radius:9px!important;padding:11px 16px!important;font-weight:850!important;font-size:11px!important;box-shadow:none!important;transition:.18s}.btn:hover{transform:translateY(-2px);border-color:#9eb2e4!important;box-shadow:0 7px 18px #173b9b12!important}.btn.primary{background:var(--blue)!important;border-color:var(--blue)!important;color:#fff!important;box-shadow:0 7px 18px #173b9b24!important}.btn.primary:hover{background:var(--blue2)!important}.btn.gold{background:#fff8e5!important;color:#795b0b!important;border-color:#ecd58f!important}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px;margin:18px 0 34px}.stat{position:relative;overflow:hidden;padding:20px 22px!important;border:1px solid var(--line)!important;border-top:3px solid var(--blue)!important;border-radius:13px!important;background:#fff!important;box-shadow:var(--shadow)!important}.stat:after{color:#173b9b08!important}.stat span{color:#75819a!important;font-size:10px!important;font-weight:850;letter-spacing:.1em;text-transform:uppercase}.stat strong{display:block;margin-top:5px;color:#142b68!important;font-size:34px!important;font-weight:1000;letter-spacing:-.04em}.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.sectionhead{display:flex;justify-content:space-between;align-items:end;gap:18px;margin:34px 0 15px;padding-bottom:13px;border-bottom:1px solid #dce3f0!important}.sectionhead h2{margin:4px 0;color:#142b68!important;font-size:clamp(22px,2.4vw,30px)!important;letter-spacing:-.04em;font-weight:950}.sectionhead p{margin:4px 0 0;color:#718098!important;font-size:12px!important}.card{background:#fff!important;border:1px solid #dfe5f0!important;border-radius:14px!important;padding:20px!important;box-shadow:var(--shadow)!important}.card h3{color:#172e69!important;font-size:15px!important;font-weight:900}.muted,.tiny{color:#718098!important}.pill{display:inline-flex;align-items:center;background:#fff8e5!important;color:#86640d!important;border:1px solid #efdfa9!important;border-radius:30px!important;padding:6px 10px!important;font-size:9px!important;font-weight:900;letter-spacing:.07em}
+th{background:#edf2ff!important;color:#183575!important;font-size:10px!important;text-transform:uppercase;letter-spacing:.08em}th,td{border-bottom:1px solid #e8edf5!important;padding:12px 13px!important}tbody tr:nth-child(even){background:#fafbfe!important}tbody tr:hover{background:#f0f4ff!important}.rank{color:#a17a16!important;font-weight:950}.teammark{background:linear-gradient(145deg,#173b9b,#3266db)!important;border:2px solid #e3c45e!important;color:#fff!important;border-radius:12px!important}.match{padding:16px 0!important;border-bottom:1px solid #e8edf5!important}.matchup{background:#f7f9fe!important;border:1px solid #e2e8f3!important;border-radius:13px!important;padding:14px!important}.match-side b,.score{color:#152d68!important}.score{font-size:28px!important;font-weight:1000!important}.score span{color:var(--gold)!important}.date{color:#a17a16!important;font-weight:850}.match-side .epl-team-logo,.team-card-top .epl-team-logo,.team-profile-head .epl-team-logo{width:44px!important;height:44px!important;max-width:44px!important;max-height:44px!important;object-fit:contain;border-radius:10px!important;border:1px solid #e3e9f4!important;background:#fff!important;padding:3px}.team-card-button{width:100%;text-align:left;cursor:pointer;transition:.2s}.team-card-button:hover{transform:translateY(-3px);border-color:#b9c9ec!important;box-shadow:0 18px 36px #173b9b17!important}.team-card-heading h3{font-size:17px!important}.team-profile-player,.team-profile-match,.newsitem{border-color:#e8edf5!important}.field label{display:block;color:#405071!important;font-size:11px!important;font-weight:850;margin-bottom:6px}.field input,.field select,.field textarea{background:#fff!important;color:#17233b!important;border:1px solid #d5deed!important;border-radius:8px!important;padding:12px!important}.field input:focus,.field select:focus,.field textarea:focus{border-color:#6689dc!important;box-shadow:0 0 0 3px #2457d61a!important}.notice{background:#f0f4ff!important;border:1px solid #d8e2f7!important;border-left:4px solid var(--blue)!important;color:#31456e!important;border-radius:9px!important;padding:14px 16px!important}.success{color:#16845b!important}.owner-access-card,.owner-identity{background:#f7f9ff!important;border:1px solid #dce5f6!important;border-radius:12px!important}.guide-intro{padding:26px!important;background:linear-gradient(120deg,#142f7d,#2457c5)!important;color:#fff!important;border-radius:16px!important}.guide-intro h2,.guide-intro p{color:#fff!important}.guide-group{background:#fff!important;border:1px solid #dfe5f0!important;border-left:4px solid var(--blue)!important;border-radius:10px!important;padding:18px!important;margin:13px 0!important;box-shadow:0 6px 20px #172f6910}.guide-group summary{color:#173b9b!important;font-size:13px!important}.guide-step{padding:13px 0!important;border-bottom:1px solid #e8edf5!important}.guide-step b{color:#203d80}.guide-step p,.guide-note{font-size:13px!important;line-height:1.8!important;color:#5d6b83!important}.guide-note{background:#fff8e5!important;border:1px solid #efdfa9!important;border-radius:8px!important;padding:14px!important;color:#6e571b!important}.footer{margin:0!important;background:#142b68!important;border-top:4px solid var(--gold)!important;color:#dce5fb!important;padding:28px!important}
+/* Rules & regulations: readable policy panels */
+#page-rules .rules-layout{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:18px}#page-rules .rules-panel{background:#fff;border:1px solid #dfe5f0;border-radius:13px;padding:22px;box-shadow:var(--shadow)}#page-rules .rules-panel h3{margin:0 0 12px;color:#173b9b;font-size:16px}#page-rules .rules-panel ul{margin:0;padding-left:21px}#page-rules .rules-panel li{padding:7px 0 7px 3px;color:#45536d;font-size:13px;line-height:1.7;border-bottom:1px solid #edf0f6}#page-rules .rules-panel li:last-child{border:0}#page-rules .rules-warning{margin-top:17px;padding:15px 18px;background:#fff8e5;border:1px solid #efdfa9;border-left:4px solid var(--gold);border-radius:9px;color:#6e571b;font-size:12px;line-height:1.8}
+:focus-visible{outline:3px solid #d9ad32!important;outline-offset:3px}::selection{background:#d9ad32;color:#142b68}
+@media(max-width:1100px){.nav{flex-wrap:wrap!important;gap:8px!important}.brand{min-width:200px!important;flex:1 0 auto!important}.navlinks{order:3!important;flex-basis:100%!important;justify-content:flex-start!important;padding:4px 0 2px}.adminbtn{margin-left:auto!important}.hero{grid-template-columns:minmax(0,1fr) 190px}.hero-mark img{max-width:170px;max-height:170px}}
+@media(max-width:760px){.nav{padding:10px 14px!important;gap:8px!important}.brand-logo{width:36px!important;height:36px!important;max-width:36px!important;max-height:36px!important}.brand strong{font-size:10px!important}.brand small{font-size:8px}.navlinks{gap:3px!important}.navlinks button{padding:9px 10px!important;font-size:10px!important}.adminbtn{padding:9px 11px!important}.wrap{padding:22px 14px 55px!important}.hero{grid-template-columns:1fr;min-height:0;padding:27px 22px!important}.hero-mark{display:none}.hero h1{font-size:clamp(43px,12vw,64px)!important}.hero p{font-size:13px!important}.stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.stat{padding:14px!important}.stat strong{font-size:27px!important}.grid2,.grid3,#page-rules .rules-layout{grid-template-columns:1fr}.sectionhead{align-items:flex-start;flex-direction:column}.sectionhead h2{font-size:24px!important}.card{padding:15px!important}.matchup{padding:10px!important}.match-side{font-size:11px}.match-side b{font-size:11px}.match-side .epl-team-logo,.match-side .teammark{width:34px!important;height:34px!important}.footer{padding:24px 15px!important}}
+@media(max-width:420px){.brand{min-width:0!important}.brand strong{font-size:9px!important}.adminbtn{font-size:9px!important}.navlinks button{font-size:9px!important;padding:8px!important}.stats{gap:7px}.stat span{font-size:8px!important}.stat strong{font-size:24px!important}}
+
+/* Live database connection indicator */
+.data-connection{display:flex;align-items:center;gap:9px;min-height:36px;margin:-4px 0 14px;padding:8px 12px;border:1px solid #dfe6f2;border-radius:9px;background:#fff;color:#66748d;font-size:10px;font-weight:750;letter-spacing:.02em}.data-dot{width:8px;height:8px;flex:0 0 8px;border-radius:50%;background:#d6a52b;box-shadow:0 0 0 3px #d6a52b20}.data-connection[data-state="ok"] .data-dot{background:#16845b;box-shadow:0 0 0 3px #16845b20}.data-connection[data-state="error"]{background:#fff8f7;border-color:#f0d4d4;color:#9d3440}.data-connection[data-state="error"] .data-dot{background:#bd3448;box-shadow:0 0 0 3px #bd344820}.data-connection button{margin-left:auto;border:1px solid #d8e0ef;border-radius:6px;background:#f7f9fd;color:#24427f;padding:5px 9px;font-size:9px;font-weight:900;cursor:pointer}.data-connection button:hover{background:#edf2ff}
+</style></head>
 <body>
 <header class="topbar"><div class="nav">
-<div class="brand"><img class="brand-logo" src="epl-logo.png" alt="European Pro League logo"><div><strong>EUROPEAN PRO LEAGUE</strong><small>EUROPE'S COURT</small></div></div>
-<nav class="navlinks" id="navlinks">
-<button class="active" data-page="home">Home</button><button data-page="standings">Standings</button><button data-page="fixtures">Fixtures & Results</button><button data-page="teams">Teams</button><button data-page="players">Players & Stats</button><button data-page="freeagents">Free Agents</button><button data-page="news">News</button><button data-page="register">Register</button><button data-page="guide">Guide</button><button data-page="rules">Rules</button>
+<div class="brand"><img alt="European Pro League logo" class="brand-logo" src="epl-logo.png"/><div><strong>EUROPEAN PRO LEAGUE</strong><small>EUROPE'S COURT</small></div></div>
+<nav aria-label="Main website categories" class="navlinks" id="navlinks">
+<button class="active" data-page="home">Home</button><button data-page="standings">Competition</button><button data-page="fixtures">Fixtures</button><button data-page="teams">Teams</button><button data-page="players">Players &amp; Stats</button><button data-page="freeagents">Free Agents</button><button data-page="news">News</button><button data-page="register">Registration</button><button data-page="guide">Guide</button><button data-page="rules">Rules &amp; Regulations</button>
 </nav><button class="adminbtn" id="adminNav">Admin ↗</button></div></header>
 <main class="wrap">
 <section class="page active" id="page-home">
-<div class="hero"><div class="hero-copy"><div class="eyebrow">Official league hub · Roblox basketball</div><h1>WHERE EUROPE<br><span>COMPETES.</span></h1><p>The home of competitive Practical Basketball across Europe. Follow the teams, track the standings, check matchdays and build your legacy.</p><div class="actions"><button class="btn primary" data-goto="standings">View standings</button><button class="btn" data-goto="fixtures">Explore fixtures</button><button class="btn" data-goto="teams">Meet the teams</button><button class="btn gold" data-goto="register">Register now</button><button class="btn" data-goto="guide">How to use EPL</button></div></div><div class="hero-mark"><img src="epl-logo.png" alt="European Pro League crest"></div></div>
-<div class="stats"><div class="stat"><span>Registered teams</span><strong id="statTeams">0</strong></div><div class="stat"><span>Matches played</span><strong id="statPlayed">0</strong></div><div class="stat"><span>Players listed</span><strong id="statPlayers">0</strong></div><div class="stat"><span>Season</span><strong id="statSeason">S1</strong></div></div>
-<div class="grid2"><div><div class="sectionhead"><div><h2>League standings</h2><p>The race to the top starts here.</p></div><button class="btn" data-goto="standings">Full table →</button></div><div class="card" id="homeStandings"></div></div><div><div class="sectionhead"><div><h2>Next tip-offs</h2><p>Upcoming league matchups.</p></div><button class="btn" data-goto="fixtures">All fixtures →</button></div><div class="card" id="homeFixtures"></div></div></div>
-<div class="sectionhead"><div><h2>Latest from the league</h2><p>Announcements, updates and league news.</p></div><button class="btn" data-goto="news">All news →</button></div><div class="grid3" id="homeNews"></div>
+  <div class="home-kicker"><span class="home-kicker-dot"></span> EUROPEAN PRO LEAGUE <span class="home-kicker-line"></span><span>OFFICIAL COMPETITION HUB</span><span class="home-season-tag">SEASON 01</span></div>
+  <div class="data-connection" id="dataConnection" role="status" aria-live="polite"><span class="data-dot"></span><span id="dataConnectionText">Connecting to the EPL database…</span><button id="retryData" type="button">RETRY</button></div>
+  <div class="home-lead">
+    <div class="home-lead-copy">
+      <div class="home-overline">THE COURT IS EUROPE'S</div>
+      <h1>ONE LEAGUE.<br><span>NO LIMITS.</span></h1>
+      <p>Every possession matters. Follow the clubs, track the race and see who rises when the lights come on.</p>
+      <div class="home-lead-actions"><button class="home-button home-button-blue" data-goto="fixtures">Explore matchday <span>↗</span></button><button class="home-text-link" data-goto="standings">View the table <span>→</span></button></div>
+    </div>
+    <div class="home-lead-art" aria-label="Stylised basketball court graphic">
+      <div class="court-label">EPL <span>•</span> EUROPE</div><div class="court-graphic"><div class="court-midline"></div><div class="court-circle"></div><div class="court-key court-key-left"></div><div class="court-key court-key-right"></div><div class="court-arc court-arc-left"></div><div class="court-arc court-arc-right"></div><img class="home-main-crest" src="epl-logo.png" alt="European Pro League official crest" loading="eager"/></div>
+      <div class="court-caption"><span>BUILT FOR THE GAME</span><strong>THE ROAD TO THE TITLE STARTS HERE.</strong></div>
+    </div>
+  </div>
+  <div class="home-metrics" aria-label="League overview">
+    <div class="home-metric-label">THE LEAGUE<br>IN NUMBERS</div>
+    <div class="home-metric"><strong id="statTeams">0</strong><span>CLUBS</span></div>
+    <div class="home-metric"><strong id="statPlayed">0</strong><span>GAMES PLAYED</span></div>
+    <div class="home-metric"><strong id="statPlayers">0</strong><span>PLAYERS</span></div>
+    <div class="home-metric-season"><span>NOW PLAYING</span><strong id="statSeason">S1</strong></div>
+  </div>
+  <div class="home-section-heading"><div><span class="home-section-index">01 / MATCHDAY</span><h2>THE NEXT TIP-OFF.</h2><p>Upcoming fixtures and the games shaping the season.</p></div><button class="home-outline-link" data-goto="fixtures">FULL FIXTURE LIST <span>↗</span></button></div>
+  <div class="home-matchday-layout"><div class="home-fixture-feature"><div class="home-panel-top"><span>UP NEXT</span><span class="home-live-mark"><i></i> LEAGUE SCHEDULE</span></div><div id="homeFixtures" class="home-fixture-list"></div></div>
+    <aside class="home-table-feature"><div class="home-panel-top"><span>THE RACE</span><span>STANDINGS</span></div><div class="home-table-title"><div><span>SEASON 01</span><h3>TOP OF THE TABLE</h3></div><button data-goto="standings" aria-label="View full standings">↗</button></div><div id="homeStandings"></div><button class="home-table-cta" data-goto="standings">VIEW FULL COMPETITION TABLE <span>→</span></button></aside>
+  </div>
+  <div class="home-section-heading home-news-heading"><div><span class="home-section-index">02 / THE LATEST</span><h2>AROUND THE LEAGUE.</h2><p>News, announcements and stories from across EPL.</p></div><button class="home-outline-link" data-goto="news">ALL LEAGUE NEWS <span>↗</span></button></div>
+  <div class="home-news-layout"><div id="homeNews" class="home-news-grid"></div><aside class="home-join-panel"><span class="home-section-index">YOUR NEXT MOVE</span><h3>MAKE YOUR<br>NAME HERE.</h3><p>Bring your team into the competition or put your name forward as a player.</p><button class="home-button home-button-gold" data-goto="register">JOIN THE LEAGUE <span>↗</span></button><div class="home-join-watermark">EPL</div></aside></div>
+  <div class="home-bottom-banner"><span>EUROPEAN PRO LEAGUE</span><strong>RESPECT THE GAME. EARN THE CROWN.</strong><button data-goto="rules">READ RULES &amp; REGULATIONS ↗</button></div>
 </section>
 <section class="page" id="page-standings"><div class="sectionhead"><div><div class="eyebrow">Competition centre</div><h2>League standings</h2><p>Rankings update when admins enter final match scores.</p></div><span class="pill" id="tableSeason">SEASON 1</span></div><div class="card"><div class="tablewrap" id="standingsTable"></div></div></section>
-<section class="page" id="page-fixtures"><div class="sectionhead"><div><div class="eyebrow">Match centre</div><h2>Fixtures & results</h2><p>Every matchup, from opening night to the final.</p></div><select id="fixtureFilter" class="btn"><option value="all">All matches</option><option value="upcoming">Upcoming</option><option value="played">Completed</option></select></div><div class="card" id="fixtureList"></div></section>
-<section class="page" id="page-teams"><div class="sectionhead"><div><div class="eyebrow">Franchises</div><h2>Teams</h2><p>Meet the clubs competing for the EPL crown.</p></div></div><div class="grid3" id="teamsGrid"></div><div id="teamProfile" class="card hidden" style="margin-top:18px"></div></section>
-<section class="page" id="page-players"><div class="sectionhead"><div><div class="eyebrow">Player hub</div><h2>Players & statistics</h2><p>Profiles, roles and season leaders.</p></div></div><div class="grid2"><div class="card"><h3>Registered players</h3><div class="field" style="margin-bottom:12px"><input id="playerSearch" placeholder="Search display name or Roblox username..."></div><div id="playersTable"></div></div><div class="card"><h3>League leaders</h3><div id="leaders"></div><p class="tiny">Stats are entered by league admins; no Roblox stats are automatically imported.</p></div></div></section>
-<section class="page" id="page-freeagents"><div class="sectionhead"><div><div class="eyebrow">Player marketplace</div><h2>Free Agents</h2><p>Discover approved free agents looking for a team.</p></div></div><div class="card" style="margin-bottom:16px"><h3>Register as a Free Agent</h3><p class="muted">Create your official EPL free-agent listing. Your profile appears after staff approval.</p><form id="freeAgentRegistrationForm"><div class="formgrid"><div class="field"><label for="freeAgentDisplayName">Display name *</label><input id="freeAgentDisplayName" name="display_name" maxlength="60" required placeholder="Your display name"></div><div class="field"><label for="freeAgentRoblox">Roblox username *</label><input id="freeAgentRoblox" name="roblox_username" maxlength="40" required placeholder="Your Roblox username"></div></div><div class="formactions"><button class="btn primary" type="submit">Register as Free Agent</button></div><div id="freeAgentRegistrationMsg" class="success" role="status" aria-live="polite"></div></form></div><div class="sectionhead"><div><h2>Registered Free Agents</h2><p>Search approved agents by display name or Roblox username.</p></div></div><div class="card"><div class="field" style="margin-bottom:12px"><input id="agentSearch" placeholder="Search free agents..."></div><div id="freeAgentsList"></div></div></section>
+<section class="page" id="page-fixtures"><div class="sectionhead"><div><div class="eyebrow">Match centre</div><h2>Fixtures &amp; results</h2><p>Every matchup, from opening night to the final.</p></div><select class="btn" id="fixtureFilter"><option value="all">All matches</option><option value="upcoming">Upcoming</option><option value="played">Completed</option></select></div><div class="card" id="fixtureList"></div></section>
+<section class="page" id="page-teams"><div class="sectionhead"><div><div class="eyebrow">Franchises</div><h2>Teams</h2><p>Meet the clubs competing for the EPL crown.</p></div></div><div class="grid3" id="teamsGrid"></div><div class="card hidden" id="teamProfile" style="margin-top:18px"></div></section>
+<section class="page" id="page-players"><div class="sectionhead"><div><div class="eyebrow">Player hub</div><h2>Players &amp; statistics</h2><p>Profiles, roles and season leaders.</p></div></div><div class="grid2"><div class="card"><h3>Registered players</h3><div class="field" style="margin-bottom:12px"><input id="playerSearch" placeholder="Search display name or Roblox username..."/></div><div id="playersTable"></div></div><div class="card"><h3>League leaders</h3><div id="leaders"></div><p class="tiny">Stats are entered by league admins; no Roblox stats are automatically imported.</p></div></div></section>
+<section class="page" id="page-freeagents"><div class="sectionhead"><div><div class="eyebrow">Player marketplace</div><h2>Free Agents</h2><p>Discover approved free agents looking for a team.</p></div></div><div class="card" style="margin-bottom:16px"><h3>Register as a Free Agent</h3><p class="muted">Create your official EPL free-agent listing. Your profile appears after staff approval.</p><form id="freeAgentRegistrationForm"><div class="formgrid"><div class="field"><label for="freeAgentDisplayName">Display name *</label><input id="freeAgentDisplayName" maxlength="60" name="display_name" placeholder="Your display name" required=""/></div><div class="field"><label for="freeAgentRoblox">Roblox username *</label><input id="freeAgentRoblox" maxlength="40" name="roblox_username" placeholder="Your Roblox username" required=""/></div></div><div class="formactions"><button class="btn primary" type="submit">Register as Free Agent</button></div><div aria-live="polite" class="success" id="freeAgentRegistrationMsg" role="status"></div></form></div><div class="sectionhead"><div><h2>Registered Free Agents</h2><p>Search approved agents by display name or Roblox username.</p></div></div><div class="card"><div class="field" style="margin-bottom:12px"><input id="agentSearch" placeholder="Search free agents..."/></div><div id="freeAgentsList"></div></div></section>
 <section class="page" id="page-news"><div class="sectionhead"><div><div class="eyebrow">Press room</div><h2>League news</h2><p>Official announcements and matchday updates.</p></div></div><div class="grid2"><div class="card" id="newsList"></div><div class="card"><h3>Official updates</h3><p class="muted">League announcements are published by authorised EPL admins and appear here automatically.</p><div class="notice">Check back for fixtures, roster updates and official league announcements.</div></div></div></section>
 <section class="page" id="page-register"><div class="sectionhead"><div><div class="eyebrow">Join the league</div><h2>EPL registration</h2><p>Submit a team or player registration. League staff will review it before it appears publicly.</p></div><span class="pill">STAFF REVIEW REQUIRED</span></div>
 <div class="notice" style="margin-bottom:16px">Registrations are saved to the EPL database. Submissions remain pending until an authorised league staff member approves them in Discord.</div>
-<div class="card owner-access-card" style="margin-bottom:16px"><h3>Team owner access</h3><p class="muted">Sign in with Discord to register a team or manage a team you own.</p><div class="owner-access-actions"><button class="btn primary" type="button" id="discordOwnerLogin">Continue with Discord</button> <button class="btn" type="button" id="ownerSignOut">Sign out</button></div><div id="ownerIdentity" class="owner-identity" hidden></div><div id="ownerRobloxSetting" class="owner-roblox-setting" hidden><div class="field"><label for="ownerRobloxUsername">Your Roblox username</label><input id="ownerRobloxUsername" maxlength="40" autocomplete="off" placeholder="Enter your Roblox username"></div><button class="btn primary" type="button" id="saveOwnerRoblox">Save my Roblox avatar</button><p class="tiny">This displays your public Roblox headshot beside your name. It does not sign you into Roblox or verify account ownership.</p></div><div id="ownerAuthStatus" class="tiny" role="status" aria-live="polite">Not signed in</div></div><div class="card" id="ownerDashboard" style="display:none;margin-bottom:16px"><h3>Your team dashboard</h3><div id="ownerTeams"></div><div id="ownerRoster"></div></div><div class="grid2"><div class="card"><h3>Register a team</h3><form id="teamRegistrationForm"><div class="formgrid"><div class="field"><label for="regTeamName">Team name *</label><input id="regTeamName" name="team_name" maxlength="60" required placeholder="e.g. London Lions"></div><div class="field"><label for="regTeamCode">Short code *</label><input id="regTeamCode" name="short_code" maxlength="4" required placeholder="e.g. LDN"></div><div class="field"><label for="regTeamRegion">Country / region *</label><input id="regTeamRegion" name="region" maxlength="60" required placeholder="e.g. United Kingdom"></div><div class="field"><label for="regCaptainName">Captain name *</label><input id="regCaptainName" name="captain_name" maxlength="60" required placeholder="Display name"></div><div class="field" style="grid-column:1/-1"><label for="regCaptainDiscord">Captain / owner contact</label><input id="regCaptainDiscord" name="captain_discord" maxlength="80" placeholder="Automatically verified from Discord login" disabled></div><div class="field" style="grid-column:1/-1"><label for="regTeamLogo">Team logo (PNG, JPG or WEBP · max 2 MB)</label><input id="regTeamLogo" name="team_logo" type="file" accept="image/png,image/jpeg,image/webp"></div></div><div class="formactions"><button class="btn primary" type="submit">Submit team registration</button></div><div id="teamRegistrationMsg" class="success" role="status" aria-live="polite"></div></form></div>
-<div class="card"><h3>Register a player</h3><form id="playerRegistrationForm"><div class="formgrid"><div class="field"><label for="regPlayerName">Display name *</label><input id="regPlayerName" name="display_name" maxlength="60" required placeholder="Your name"></div><div class="field"><label for="regRobloxName">Roblox username *</label><input id="regRobloxName" name="roblox_username" maxlength="40" required placeholder="Roblox username"></div><div class="field"><label for="regPlayerDiscord">Discord username or user ID *</label><input id="regPlayerDiscord" name="discord_username" maxlength="80" required placeholder="Discord username"></div><div class="field"><label for="regPlayerTeam">Team (optional)</label><select id="regPlayerTeam" name="team_id"><option value="">Free Agent / no team</option></select></div><div class="field" style="grid-column:1/-1"><label for="regPlayerRole">Position / role (optional)</label><input id="regPlayerRole" name="position" maxlength="60" placeholder="Guard, forward, captain…"></div></div><div class="formactions"><button class="btn primary" type="submit">Submit player registration</button></div><div id="playerRegistrationMsg" class="success" role="status" aria-live="polite"></div></form></div></div>
+<div class="card owner-access-card" style="margin-bottom:16px"><h3>Team owner access</h3><p class="muted">Sign in with Discord to register a team or manage a team you own.</p><div class="owner-access-actions"><button class="btn primary" id="discordOwnerLogin" type="button">Continue with Discord</button> <button class="btn" id="ownerSignOut" type="button">Sign out</button></div><div class="owner-identity" hidden="" id="ownerIdentity"></div><div class="owner-roblox-setting" hidden="" id="ownerRobloxSetting"><div class="field"><label for="ownerRobloxUsername">Your Roblox username</label><input autocomplete="off" id="ownerRobloxUsername" maxlength="40" placeholder="Enter your Roblox username"/></div><button class="btn primary" id="saveOwnerRoblox" type="button">Save my Roblox avatar</button><p class="tiny">This displays your public Roblox headshot beside your name. It does not sign you into Roblox or verify account ownership.</p></div><div aria-live="polite" class="tiny" id="ownerAuthStatus" role="status">Not signed in</div></div><div class="card" id="ownerDashboard" style="display:none;margin-bottom:16px"><h3>Your team dashboard</h3><div id="ownerTeams"></div><div id="ownerRoster"></div></div><div class="grid2"><div class="card"><h3>Register a team</h3><form id="teamRegistrationForm"><div class="formgrid"><div class="field"><label for="regTeamName">Team name *</label><input id="regTeamName" maxlength="60" name="team_name" placeholder="e.g. London Lions" required=""/></div><div class="field"><label for="regTeamCode">Short code *</label><input id="regTeamCode" maxlength="4" name="short_code" placeholder="e.g. LDN" required=""/></div><div class="field"><label for="regTeamRegion">Country / region *</label><input id="regTeamRegion" maxlength="60" name="region" placeholder="e.g. United Kingdom" required=""/></div><div class="field"><label for="regCaptainName">Captain name *</label><input id="regCaptainName" maxlength="60" name="captain_name" placeholder="Display name" required=""/></div><div class="field" style="grid-column:1/-1"><label for="regCaptainDiscord">Captain / owner contact</label><input disabled="" id="regCaptainDiscord" maxlength="80" name="captain_discord" placeholder="Automatically verified from Discord login"/></div><div class="field" style="grid-column:1/-1"><label for="regTeamLogo">Team logo (PNG, JPG or WEBP · max 2 MB)</label><input accept="image/png,image/jpeg,image/webp" id="regTeamLogo" name="team_logo" type="file"/></div></div><div class="formactions"><button class="btn primary" type="submit">Submit team registration</button></div><div aria-live="polite" class="success" id="teamRegistrationMsg" role="status"></div></form></div>
+<div class="card"><h3>Register a player</h3><form id="playerRegistrationForm"><div class="formgrid"><div class="field"><label for="regPlayerName">Display name *</label><input id="regPlayerName" maxlength="60" name="display_name" placeholder="Your name" required=""/></div><div class="field"><label for="regRobloxName">Roblox username *</label><input id="regRobloxName" maxlength="40" name="roblox_username" placeholder="Roblox username" required=""/></div><div class="field"><label for="regPlayerDiscord">Discord username or user ID *</label><input id="regPlayerDiscord" maxlength="80" name="discord_username" placeholder="Discord username" required=""/></div><div class="field"><label for="regPlayerTeam">Team (optional)</label><select id="regPlayerTeam" name="team_id"><option value="">Free Agent / no team</option></select></div><div class="field" style="grid-column:1/-1"><label for="regPlayerRole">Position / role (optional)</label><input id="regPlayerRole" maxlength="60" name="position" placeholder="Guard, forward, captain…"/></div></div><div class="formactions"><button class="btn primary" type="submit">Submit player registration</button></div><div aria-live="polite" class="success" id="playerRegistrationMsg" role="status"></div></form></div></div>
 <div class="card" style="margin-top:16px"><h3>What happens next?</h3><p class="muted">Your application is stored as pending. League staff will review it using the EPL Discord bot. Approved teams and players will then appear on the website.</p></div></section>
-
 <section class="page" id="page-guide">
-  <div class="sectionhead"><div><div class="eyebrow">Your EPL handbook</div><h2>Website guide</h2><p>Step-by-step help for fans, players, team owners and league staff.</p></div><span class="pill">START HERE</span></div>
-  <div class="guide-intro"><div class="eyebrow">European Pro League · Help centre</div><h2>EVERYTHING EPL.<br><span style="color:#6da5ff">STEP BY STEP.</span></h2><p>Use this guide to find matches, follow teams, check player numbers, register, manage a squad or run league operations. Open a section below and follow the steps in order.</p><div class="guide-actions"><button class="btn primary" data-goto="fixtures">View fixtures</button><button class="btn" data-goto="teams">Explore teams</button><button class="btn" data-goto="register">Register</button><button class="btn" data-goto="rules">Read rules</button></div></div>
-  <div class="guide-shortcuts">
-    <div class="guide-shortcut"><strong>Just browsing?</strong><span>Standings, match schedules, team profiles, player stats and league news.</span></div>
-    <div class="guide-shortcut"><strong>Joining as a player?</strong><span>Submit your player details or create a free-agent listing.</span></div>
-    <div class="guide-shortcut"><strong>Running a team?</strong><span>Sign in with Discord, register your club and manage approved players.</span></div>
-    <div class="guide-shortcut"><strong>League staff?</strong><span>Approve applications, schedule games, enter results and update the league.</span></div>
-  </div>
-
-  <details class="guide-group" open>
-    <summary>01 · Finding your way around</summary>
-    <div class="guide-group-body">
-      <div class="guide-step"><b>Step 1 — Use the navigation bar.</b><p>Choose Home, Standings, Fixtures & Results, Teams, Players & Stats, Free Agents, News, Register, Guide or Rules. On a phone, swipe the navigation bar sideways to see the remaining tabs.</p></div>
-      <div class="guide-step"><b>Step 2 — Start on Home.</b><p>The Home page gives you the league overview: team, match and player counts, a preview of the standings, the next scheduled games and recent announcements.</p></div>
-      <div class="guide-step"><b>Step 3 — Use the shortcut buttons.</b><p>Buttons such as View standings, Explore fixtures, Meet the teams and Register now take you directly to that section. You can return to Home from the navigation bar.</p></div>
-      <div class="guide-step"><b>Step 4 — Open this Guide whenever you need help.</b><p>Each numbered section below explains a different job you can do on the website. Tap a heading to expand or collapse its instructions.</p></div>
-    </div>
-  </details>
-
-  <details class="guide-group">
-    <summary>02 · Checking the standings</summary>
-    <div class="guide-group-body">
-      <div class="guide-step"><b>Step 1.</b><p>Click <b>Standings</b> in the navigation bar, or select View standings from Home.</p></div>
-      <div class="guide-step"><b>Step 2.</b><p>Find your team in the table. Teams are ordered by table points, then points difference, then points scored.</p></div>
-      <div class="guide-step"><b>Step 3.</b><p>Read the columns using the key below. The table changes when an authorised admin records a completed match result.</p></div>
-      <div class="guide-glossary">
-        <div><b>P — Played</b><br>Number of completed matches.</div><div><b>W — Wins</b><br>Matches won by the team.</div>
-        <div><b>L — Losses</b><br>Matches lost by the team.</div><div><b>PF — Points for</b><br>Total points scored by the team.</div>
-        <div><b>PA — Points against</b><br>Total points scored by opponents.</div><div><b>+/- — Difference</b><br>Points for minus points against.</div>
-        <div><b>Pts — Table points</b><br>The current table awards two points per win.</div>
-      </div>
-    </div>
-  </details>
-
-  <details class="guide-group">
-    <summary>03 · Finding fixtures and results</summary>
-    <div class="guide-group-body">
-      <div class="guide-step"><b>Step 1.</b><p>Open <b>Fixtures & Results</b>.</p></div>
-      <div class="guide-step"><b>Step 2.</b><p>Use the filter at the top-right to show <b>All matches</b>, <b>Upcoming</b> or <b>Completed</b>.</p></div>
-      <div class="guide-step"><b>Step 3.</b><p>Check the date and match note above each matchup. The home team appears on the left and the away team on the right.</p></div>
-      <div class="guide-step"><b>Step 4.</b><p>For an upcoming match, the centre displays <b>VS</b> and <b>SCHEDULED</b>. For a completed match, it displays the final score and <b>FT</b>.</p></div>
-      <p>Home also displays a preview of the next scheduled matches. The full Fixtures & Results page is where you should check the complete list.</p>
-    </div>
-  </details>
-
-  <details class="guide-group">
-    <summary>04 · Viewing a team, its squad and record</summary>
-    <div class="guide-group-body">
-      <div class="guide-step"><b>Step 1.</b><p>Open <b>Teams</b> to see the approved teams in the league.</p></div>
-      <div class="guide-step"><b>Step 2.</b><p>Click the team card you want to inspect. Its profile should open underneath the cards.</p></div>
-      <div class="guide-step"><b>Step 3.</b><p>Review the team record: games played, wins, losses, points for, points against and table points.</p></div>
-      <div class="guide-step"><b>Step 4.</b><p>Check <b>Squad & recent player stats</b> to see the approved players linked to that team and their recorded totals from the team's last five completed games.</p></div>
-      <div class="guide-step"><b>Step 5.</b><p>Check <b>Recent results</b> for the team's latest completed matchups and scores. Select Close to hide the profile.</p></div>
-      <div class="guide-note">A team profile may show zeroes or “No stats recorded yet” when the league has not entered match stats. Player stats are entered by admins; they are not automatically imported from Roblox.</div>
-    </div>
-  </details>
-
-  <details class="guide-group">
-    <summary>05 · Finding players and checking stats</summary>
-    <div class="guide-group-body">
-      <div class="guide-step"><b>Step 1.</b><p>Open <b>Players & Stats</b>.</p></div>
-      <div class="guide-step"><b>Step 2.</b><p>Type a display name, Roblox username or team name into the search box to narrow the player list.</p></div>
-      <div class="guide-step"><b>Step 3.</b><p>Read the player row for their display name, Roblox username, team and position, plus the stats that have been recorded for them.</p></div>
-      <div class="guide-step"><b>Step 4.</b><p>For the team's recent-game totals, open Teams, select the player's team and check the squad section in its profile.</p></div>
-      <p>Stat labels include PTS (points), REB (rebounds), AST (assists), STL (steals), BLK (blocks), TO (turnovers), PF (fouls) and MIN (minutes). Numbers depend on the match entries made by league staff.</p>
-    </div>
-  </details>
-
-  <details class="guide-group">
-    <summary>06 · Registering as a player</summary>
-    <div class="guide-group-body">
-      <div class="guide-step"><b>Step 1.</b><p>Open <b>Register</b>.</p></div>
-      <div class="guide-step"><b>Step 2.</b><p>In the Register a player form, enter your display name, Roblox username and Discord username or user ID.</p></div>
-      <div class="guide-step"><b>Step 3.</b><p>Choose your team from the optional team list, or leave it as Free Agent / no team. Add your position or role if you have one.</p></div>
-      <div class="guide-step"><b>Step 4.</b><p>Click <b>Submit player registration</b>. Check the message below the form to confirm it was submitted.</p></div>
-      <div class="guide-step"><b>Step 5.</b><p>Wait for EPL staff to review the application. Your approved listing appears on the public Players page.</p></div>
-      <div class="guide-note">Submitting a registration does not mean it has already been approved or that you have been added to a team's playing roster. A team owner must add an approved player to the team squad.</div>
-    </div>
-  </details>
-
-  <details class="guide-group">
-    <summary>07 · Registering as a free agent</summary>
-    <div class="guide-group-body">
-      <div class="guide-step"><b>Step 1.</b><p>Open <b>Free Agents</b>.</p></div>
-      <div class="guide-step"><b>Step 2.</b><p>Under Register as a Free Agent, enter your display name and Roblox username.</p></div>
-      <div class="guide-step"><b>Step 3.</b><p>Click <b>Register as Free Agent</b> and check the confirmation message.</p></div>
-      <div class="guide-step"><b>Step 4.</b><p>Wait for staff approval. After approval, your listing appears in Registered Free Agents.</p></div>
-      <div class="guide-step"><b>Step 5.</b><p>Use the search box to find an approved free agent by display name or Roblox username.</p></div>
-      <p>Team owners can add approved players to their team from the owner dashboard, subject to available roster spaces.</p>
-    </div>
-  </details>
-
-  <details class="guide-group">
-    <summary>08 · Registering a team and signing in as its owner</summary>
-    <div class="guide-group-body">
-      <div class="guide-step"><b>Step 1 — Sign in.</b><p>Go to <b>Register</b> and click <b>Continue with Discord</b> in Team owner access. Complete the Discord authorisation prompt.</p></div>
-      <div class="guide-step"><b>Step 2 — Add your Roblox avatar.</b><p>After signing in, enter your Roblox username in the Team owner access panel and click <b>Save my Roblox avatar</b>. Your public Roblox headshot will appear beside your signed-in name when Roblox returns a matching thumbnail.</p></div>
-      <div class="guide-step"><b>Step 3 — Complete the team form.</b><p>Enter the team name, short code (up to four characters), country or region and captain name. The owner contact is linked to the Discord sign-in.</p></div>
-      <div class="guide-step"><b>Step 4 — Add the team logo.</b><p>Choose a PNG, JPG or WEBP image no larger than 2 MB. This is optional, but a logo helps your club stand out on fixtures and team cards.</p></div>
-      <div class="guide-step"><b>Step 5 — Submit.</b><p>Click <b>Submit team registration</b>. The application remains pending until authorised EPL staff approve it.</p></div>
-      <div class="guide-step"><b>Step 6 — Check your dashboard.</b><p>After approval, return to Register and sign in with the same Discord account. Your team and owner tools should appear in Your team dashboard.</p></div>
-      <div class="guide-note">Team registration and player registration are separate applications. Registering a team does not automatically register every player on its roster. The Roblox avatar link is for display only; it does not verify ownership of the Roblox account.</div>
-    </div>
-  </details>
-
-  <details class="guide-group">
-    <summary>09 · Managing your team roster as an owner</summary>
-    <div class="guide-group-body">
-      <div class="guide-step"><b>Step 1.</b><p>Open Register and sign in with the Discord account connected to your approved team.</p></div>
-      <div class="guide-step"><b>Step 2.</b><p>Find Your team dashboard and check your team status. Pending teams must be approved before roster tools become available.</p></div>
-      <div class="guide-step"><b>Step 3 — Add a player.</b><p>In the squad area, choose an approved player from Add approved player, choose Starter or Substitute, then click <b>Add player to squad</b>.</p></div>
-      <div class="guide-step"><b>Step 4 — Change a role.</b><p>Use the button next to a player to switch them between starting player and substitute.</p></div>
-      <div class="guide-step"><b>Step 5 — Remove a player.</b><p>Click Remove next to the player and confirm when asked.</p></div>
-      <div class="guide-note">The EPL roster format is five starting players and up to ten substitutes (15 players maximum). A player must have an approved registration before they can be selected from the owner dashboard.</div>
-    </div>
-  </details>
-
-  <details class="guide-group">
-    <summary>10 · Reading league news and rules</summary>
-    <div class="guide-group-body">
-      <div class="guide-step"><b>News — Step 1.</b><p>Open <b>News</b> to read official league announcements, matchday updates and competition notices. Recent posts may also appear on Home.</p></div>
-      <div class="guide-step"><b>Rules — Step 1.</b><p>Open <b>Rules</b> to read the competition basics and conduct guidance. Check this page before taking part in league matches.</p></div>
-      <div class="guide-note">The current Rules page labels its wording as starter rules. The league owner and officials should publish and approve the final competition format, deadlines and protest process before relying on it as the complete rulebook.</div>
-    </div>
-  </details>
-
-  <details class="guide-group">
-    <summary>11 · Admin guide: signing in and approving applications</summary>
-    <div class="guide-group-body">
-      <div class="guide-step"><b>Step 1 — Open Admin.</b><p>Click <b>Admin ↗</b> in the top-right corner. This opens the restricted admin area.</p></div>
-      <div class="guide-step"><b>Step 2 — Sign in.</b><p>Click <b>Continue with Discord</b>. Only Discord accounts approved by the league owner can access the dashboard.</p></div>
-      <div class="guide-step"><b>Step 3 — Review pending applications.</b><p>Check Pending team registrations, Pending player registrations and Pending free-agent registrations.</p></div>
-      <div class="guide-step"><b>Step 4 — Make a decision.</b><p>Check the applicant details, then click <b>Approve</b> or <b>Reject</b>. Approved entries can appear in the public site and become available for scheduling or roster selection.</p></div>
-      <div class="guide-step"><b>Step 5.</b><p>Refresh the public data by returning to the relevant page or reloading the website if you need to confirm the result.</p></div>
-      <div class="guide-note">Only approve applications after checking that the submitted player, Roblox account, team details and owner information are correct.</div>
-    </div>
-  </details>
-
-  <details class="guide-group">
-    <summary>12 · Admin guide: fixtures, scores and player stats</summary>
-    <div class="guide-group-body">
-      <h4>Create a fixture</h4>
-      <ol><li>In the admin dashboard, find Schedule a fixture.</li><li>Choose the Home team and Away team.</li><li>Set the date and time, then add a match note such as the round or week.</li><li>Click Create fixture. The matchup should appear in Fixtures & Results as scheduled.</li></ol>
-      <h4>Record a final score</h4>
-      <ol><li>Find Record a match result.</li><li>Select the correct fixture.</li><li>Enter the home score and away score.</li><li>Add an evidence link or match report in the optional field when needed.</li><li>Click Save final score. The result appears publicly and the standings recalculate.</li></ol>
-      <h4>Enter an individual player's game stats</h4>
-      <ol><li>Find Record player stats manually.</li><li>Select the match and the approved player.</li><li>Enter points, rebounds, assists, steals, blocks, turnovers, fouls and minutes played.</li><li>Click Save player stats. Those figures can then appear in player and team stat summaries.</li></ol>
-      <div class="guide-note">Player statistics are entered manually by admins. The website does not automatically read box scores or performance data from Roblox.</div>
-    </div>
-  </details>
-
-  <details class="guide-group">
-    <summary>13 · Admin guide: team details, forfeits, news and discipline</summary>
-    <div class="guide-group-body">
-      <h4>Edit an approved team</h4>
-      <ol><li>Go to Manage teams.</li><li>Select the approved team.</li><li>Edit its team name, short code, region or captain name.</li><li>Click Save team details.</li></ol>
-      <h4>Update a match or record a forfeit</h4>
-      <ol><li>Go to Match administration and choose the fixture.</li><li>Choose Normal result, Home team forfeits, Away team forfeits, Double forfeit, Cancel fixture or Reopen as upcoming.</li><li>For a normal result, enter the scores. Add an admin note when useful.</li><li>Click Apply match update and check the public fixtures and standings.</li></ol>
-      <h4>Publish a league announcement</h4>
-      <ol><li>Go to Publish league news.</li><li>Enter a headline, choose a category and write the article.</li><li>Click Publish announcement. The post appears in News and may appear on Home.</li></ol>
-      <h4>Record a discipline decision</h4>
-      <ol><li>Go to Discipline record.</li><li>Choose whether the subject is a team or a player, then select the subject.</li><li>Choose Warning, Suspension, Fine, Ban or Official note.</li><li>Enter the details and click Save discipline record.</li></ol>
-      <h4>Sign out</h4><p>Use the Admin dashboard's Sign out button when you have finished making changes.</p>
-      <div class="guide-note">Forfeits are recorded by an authorised admin using Match administration. The current website does not automatically detect that a team has failed to attend or automatically award the forfeit.</div>
-    </div>
-  </details>
-
-  <details class="guide-group">
-    <summary>14 · What the website does not automate yet</summary>
-    <div class="guide-group-body">
-      <ul>
-        <li><b>Roblox stat imports:</b> player stats must be entered by an admin; they are not pulled automatically from Practical Basketball.</li>
-        <li><b>Match evidence checks:</b> the result form has an optional evidence/report field, but there is no built-in screenshot upload, opponent confirmation or dispute-resolution workflow yet.</li>
-        <li><b>Automatic forfeits:</b> admins currently select the forfeit outcome in Match administration.</li>
-        <li><b>Application decisions:</b> team, player and free-agent listings remain pending until staff review them.</li>
-      </ul>
-      <p>When something is missing, check whether the application has been approved and whether an admin has entered the relevant result or stats. For account access or a site error, contact EPL league staff through the official Discord server.</p>
-    </div>
-  </details>
-  <div class="guide-actions"><button class="btn primary" data-goto="home">Back to Home</button><button class="btn" data-goto="register">Go to Registration</button><button class="btn" data-goto="rules">Open Rules</button></div>
+<div class="sectionhead"><div><div class="eyebrow">Your EPL handbook</div><h2>Website guide</h2><p>Step-by-step help for fans, players, team owners and league staff.</p></div><span class="pill">START HERE</span></div>
+<div class="guide-intro"><div class="eyebrow">European Pro League · Help centre</div><h2>EVERYTHING EPL.<br/><span style="color:#6da5ff">STEP BY STEP.</span></h2><p>Use this guide to find matches, follow teams, check player numbers, register, manage a squad or run league operations. Open a section below and follow the steps in order.</p><div class="guide-actions"><button class="btn primary" data-goto="fixtures">View fixtures</button><button class="btn" data-goto="teams">Explore teams</button><button class="btn" data-goto="register">Register</button><button class="btn" data-goto="rules">Read rules</button></div></div>
+<div class="guide-shortcuts">
+<div class="guide-shortcut"><strong>Just browsing?</strong><span>Standings, match schedules, team profiles, player stats and league news.</span></div>
+<div class="guide-shortcut"><strong>Joining as a player?</strong><span>Submit your player details or create a free-agent listing.</span></div>
+<div class="guide-shortcut"><strong>Running a team?</strong><span>Sign in with Discord, register your club and manage approved players.</span></div>
+<div class="guide-shortcut"><strong>League staff?</strong><span>Approve applications, schedule games, enter results and update the league.</span></div>
+</div>
+<details class="guide-group" open="">
+<summary>01 · Finding your way around</summary>
+<div class="guide-group-body">
+<div class="guide-step"><b>Step 1 — Use the navigation bar.</b><p>Choose Home, Standings, Fixtures &amp; Results, Teams, Players &amp; Stats, Free Agents, News, Register, Guide or Rules. On a phone, swipe the navigation bar sideways to see the remaining tabs.</p></div>
+<div class="guide-step"><b>Step 2 — Start on Home.</b><p>The Home page gives you the league overview: team, match and player counts, a preview of the standings, the next scheduled games and recent announcements.</p></div>
+<div class="guide-step"><b>Step 3 — Use the shortcut buttons.</b><p>Buttons such as View standings, Explore fixtures, Meet the teams and Register now take you directly to that section. You can return to Home from the navigation bar.</p></div>
+<div class="guide-step"><b>Step 4 — Open this Guide whenever you need help.</b><p>Each numbered section below explains a different job you can do on the website. Tap a heading to expand or collapse its instructions.</p></div>
+</div>
+</details>
+<details class="guide-group">
+<summary>02 · Checking the standings</summary>
+<div class="guide-group-body">
+<div class="guide-step"><b>Step 1.</b><p>Click <b>Standings</b> in the navigation bar, or select View standings from Home.</p></div>
+<div class="guide-step"><b>Step 2.</b><p>Find your team in the table. Teams are ordered by table points, then points difference, then points scored.</p></div>
+<div class="guide-step"><b>Step 3.</b><p>Read the columns using the key below. The table changes when an authorised admin records a completed match result.</p></div>
+<div class="guide-glossary">
+<div><b>P — Played</b><br/>Number of completed matches.</div><div><b>W — Wins</b><br/>Matches won by the team.</div>
+<div><b>L — Losses</b><br/>Matches lost by the team.</div><div><b>PF — Points for</b><br/>Total points scored by the team.</div>
+<div><b>PA — Points against</b><br/>Total points scored by opponents.</div><div><b>+/- — Difference</b><br/>Points for minus points against.</div>
+<div><b>Pts — Table points</b><br/>The current table awards two points per win.</div>
+</div>
+</div>
+</details>
+<details class="guide-group">
+<summary>03 · Finding fixtures and results</summary>
+<div class="guide-group-body">
+<div class="guide-step"><b>Step 1.</b><p>Open <b>Fixtures &amp; Results</b>.</p></div>
+<div class="guide-step"><b>Step 2.</b><p>Use the filter at the top-right to show <b>All matches</b>, <b>Upcoming</b> or <b>Completed</b>.</p></div>
+<div class="guide-step"><b>Step 3.</b><p>Check the date and match note above each matchup. The home team appears on the left and the away team on the right.</p></div>
+<div class="guide-step"><b>Step 4.</b><p>For an upcoming match, the centre displays <b>VS</b> and <b>SCHEDULED</b>. For a completed match, it displays the final score and <b>FT</b>.</p></div>
+<p>Home also displays a preview of the next scheduled matches. The full Fixtures &amp; Results page is where you should check the complete list.</p>
+</div>
+</details>
+<details class="guide-group">
+<summary>04 · Viewing a team, its squad and record</summary>
+<div class="guide-group-body">
+<div class="guide-step"><b>Step 1.</b><p>Open <b>Teams</b> to see the approved teams in the league.</p></div>
+<div class="guide-step"><b>Step 2.</b><p>Click the team card you want to inspect. Its profile should open underneath the cards.</p></div>
+<div class="guide-step"><b>Step 3.</b><p>Review the team record: games played, wins, losses, points for, points against and table points.</p></div>
+<div class="guide-step"><b>Step 4.</b><p>Check <b>Squad &amp; recent player stats</b> to see the approved players linked to that team and their recorded totals from the team's last five completed games.</p></div>
+<div class="guide-step"><b>Step 5.</b><p>Check <b>Recent results</b> for the team's latest completed matchups and scores. Select Close to hide the profile.</p></div>
+<div class="guide-note">A team profile may show zeroes or “No stats recorded yet” when the league has not entered match stats. Player stats are entered by admins; they are not automatically imported from Roblox.</div>
+</div>
+</details>
+<details class="guide-group">
+<summary>05 · Finding players and checking stats</summary>
+<div class="guide-group-body">
+<div class="guide-step"><b>Step 1.</b><p>Open <b>Players &amp; Stats</b>.</p></div>
+<div class="guide-step"><b>Step 2.</b><p>Type a display name, Roblox username or team name into the search box to narrow the player list.</p></div>
+<div class="guide-step"><b>Step 3.</b><p>Read the player row for their display name, Roblox username, team and position, plus the stats that have been recorded for them.</p></div>
+<div class="guide-step"><b>Step 4.</b><p>For the team's recent-game totals, open Teams, select the player's team and check the squad section in its profile.</p></div>
+<p>Stat labels include PTS (points), REB (rebounds), AST (assists), STL (steals), BLK (blocks), TO (turnovers), PF (fouls) and MIN (minutes). Numbers depend on the match entries made by league staff.</p>
+</div>
+</details>
+<details class="guide-group">
+<summary>06 · Registering as a player</summary>
+<div class="guide-group-body">
+<div class="guide-step"><b>Step 1.</b><p>Open <b>Register</b>.</p></div>
+<div class="guide-step"><b>Step 2.</b><p>In the Register a player form, enter your display name, Roblox username and Discord username or user ID.</p></div>
+<div class="guide-step"><b>Step 3.</b><p>Choose your team from the optional team list, or leave it as Free Agent / no team. Add your position or role if you have one.</p></div>
+<div class="guide-step"><b>Step 4.</b><p>Click <b>Submit player registration</b>. Check the message below the form to confirm it was submitted.</p></div>
+<div class="guide-step"><b>Step 5.</b><p>Wait for EPL staff to review the application. Your approved listing appears on the public Players page.</p></div>
+<div class="guide-note">Submitting a registration does not mean it has already been approved or that you have been added to a team's playing roster. A team owner must add an approved player to the team squad.</div>
+</div>
+</details>
+<details class="guide-group">
+<summary>07 · Registering as a free agent</summary>
+<div class="guide-group-body">
+<div class="guide-step"><b>Step 1.</b><p>Open <b>Free Agents</b>.</p></div>
+<div class="guide-step"><b>Step 2.</b><p>Under Register as a Free Agent, enter your display name and Roblox username.</p></div>
+<div class="guide-step"><b>Step 3.</b><p>Click <b>Register as Free Agent</b> and check the confirmation message.</p></div>
+<div class="guide-step"><b>Step 4.</b><p>Wait for staff approval. After approval, your listing appears in Registered Free Agents.</p></div>
+<div class="guide-step"><b>Step 5.</b><p>Use the search box to find an approved free agent by display name or Roblox username.</p></div>
+<p>Team owners can add approved players to their team from the owner dashboard, subject to available roster spaces.</p>
+</div>
+</details>
+<details class="guide-group">
+<summary>08 · Registering a team and signing in as its owner</summary>
+<div class="guide-group-body">
+<div class="guide-step"><b>Step 1 — Sign in.</b><p>Go to <b>Register</b> and click <b>Continue with Discord</b> in Team owner access. Complete the Discord authorisation prompt.</p></div>
+<div class="guide-step"><b>Step 2 — Add your Roblox avatar.</b><p>After signing in, enter your Roblox username in the Team owner access panel and click <b>Save my Roblox avatar</b>. Your public Roblox headshot will appear beside your signed-in name when Roblox returns a matching thumbnail.</p></div>
+<div class="guide-step"><b>Step 3 — Complete the team form.</b><p>Enter the team name, short code (up to four characters), country or region and captain name. The owner contact is linked to the Discord sign-in.</p></div>
+<div class="guide-step"><b>Step 4 — Add the team logo.</b><p>Choose a PNG, JPG or WEBP image no larger than 2 MB. This is optional, but a logo helps your club stand out on fixtures and team cards.</p></div>
+<div class="guide-step"><b>Step 5 — Submit.</b><p>Click <b>Submit team registration</b>. The application remains pending until authorised EPL staff approve it.</p></div>
+<div class="guide-step"><b>Step 6 — Check your dashboard.</b><p>After approval, return to Register and sign in with the same Discord account. Your team and owner tools should appear in Your team dashboard.</p></div>
+<div class="guide-note">Team registration and player registration are separate applications. Registering a team does not automatically register every player on its roster. The Roblox avatar link is for display only; it does not verify ownership of the Roblox account.</div>
+</div>
+</details>
+<details class="guide-group">
+<summary>09 · Managing your team roster as an owner</summary>
+<div class="guide-group-body">
+<div class="guide-step"><b>Step 1.</b><p>Open Register and sign in with the Discord account connected to your approved team.</p></div>
+<div class="guide-step"><b>Step 2.</b><p>Find Your team dashboard and check your team status. Pending teams must be approved before roster tools become available.</p></div>
+<div class="guide-step"><b>Step 3 — Add a player.</b><p>In the squad area, choose an approved player from Add approved player, choose Starter or Substitute, then click <b>Add player to squad</b>.</p></div>
+<div class="guide-step"><b>Step 4 — Change a role.</b><p>Use the button next to a player to switch them between starting player and substitute.</p></div>
+<div class="guide-step"><b>Step 5 — Remove a player.</b><p>Click Remove next to the player and confirm when asked.</p></div>
+<div class="guide-note">The EPL roster format is five starting players and up to ten substitutes (15 players maximum). A player must have an approved registration before they can be selected from the owner dashboard.</div>
+</div>
+</details>
+<details class="guide-group">
+<summary>10 · Reading league news and rules</summary>
+<div class="guide-group-body">
+<div class="guide-step"><b>News — Step 1.</b><p>Open <b>News</b> to read official league announcements, matchday updates and competition notices. Recent posts may also appear on Home.</p></div>
+<div class="guide-step"><b>Rules — Step 1.</b><p>Open <b>Rules</b> to read the competition basics and conduct guidance. Check this page before taking part in league matches.</p></div>
+<div class="guide-note">The current Rules page labels its wording as starter rules. The league owner and officials should publish and approve the final competition format, deadlines and protest process before relying on it as the complete rulebook.</div>
+</div>
+</details>
+<details class="guide-group">
+<summary>11 · Admin guide: signing in and approving applications</summary>
+<div class="guide-group-body">
+<div class="guide-step"><b>Step 1 — Open Admin.</b><p>Click <b>Admin ↗</b> in the top-right corner. This opens the restricted admin area.</p></div>
+<div class="guide-step"><b>Step 2 — Sign in.</b><p>Click <b>Continue with Discord</b>. Only Discord accounts approved by the league owner can access the dashboard.</p></div>
+<div class="guide-step"><b>Step 3 — Review pending applications.</b><p>Check Pending team registrations, Pending player registrations and Pending free-agent registrations.</p></div>
+<div class="guide-step"><b>Step 4 — Make a decision.</b><p>Check the applicant details, then click <b>Approve</b> or <b>Reject</b>. Approved entries can appear in the public site and become available for scheduling or roster selection.</p></div>
+<div class="guide-step"><b>Step 5.</b><p>Refresh the public data by returning to the relevant page or reloading the website if you need to confirm the result.</p></div>
+<div class="guide-note">Only approve applications after checking that the submitted player, Roblox account, team details and owner information are correct.</div>
+</div>
+</details>
+<details class="guide-group">
+<summary>12 · Admin guide: fixtures, scores and player stats</summary>
+<div class="guide-group-body">
+<h4>Create a fixture</h4>
+<ol><li>In the admin dashboard, find Schedule a fixture.</li><li>Choose the Home team and Away team.</li><li>Set the date and time, then add a match note such as the round or week.</li><li>Click Create fixture. The matchup should appear in Fixtures &amp; Results as scheduled.</li></ol>
+<h4>Record a final score</h4>
+<ol><li>Find Record a match result.</li><li>Select the correct fixture.</li><li>Enter the home score and away score.</li><li>Add an evidence link or match report in the optional field when needed.</li><li>Click Save final score. The result appears publicly and the standings recalculate.</li></ol>
+<h4>Enter an individual player's game stats</h4>
+<ol><li>Find Record player stats manually.</li><li>Select the match and the approved player.</li><li>Enter points, rebounds, assists, steals, blocks, turnovers, fouls and minutes played.</li><li>Click Save player stats. Those figures can then appear in player and team stat summaries.</li></ol>
+<div class="guide-note">Player statistics are entered manually by admins. The website does not automatically read box scores or performance data from Roblox.</div>
+</div>
+</details>
+<details class="guide-group">
+<summary>13 · Admin guide: team details, forfeits, news and discipline</summary>
+<div class="guide-group-body">
+<h4>Edit an approved team</h4>
+<ol><li>Go to Manage teams.</li><li>Select the approved team.</li><li>Edit its team name, short code, region or captain name.</li><li>Click Save team details.</li></ol>
+<h4>Update a match or record a forfeit</h4>
+<ol><li>Go to Match administration and choose the fixture.</li><li>Choose Normal result, Home team forfeits, Away team forfeits, Double forfeit, Cancel fixture or Reopen as upcoming.</li><li>For a normal result, enter the scores. Add an admin note when useful.</li><li>Click Apply match update and check the public fixtures and standings.</li></ol>
+<h4>Publish a league announcement</h4>
+<ol><li>Go to Publish league news.</li><li>Enter a headline, choose a category and write the article.</li><li>Click Publish announcement. The post appears in News and may appear on Home.</li></ol>
+<h4>Record a discipline decision</h4>
+<ol><li>Go to Discipline record.</li><li>Choose whether the subject is a team or a player, then select the subject.</li><li>Choose Warning, Suspension, Fine, Ban or Official note.</li><li>Enter the details and click Save discipline record.</li></ol>
+<h4>Sign out</h4><p>Use the Admin dashboard's Sign out button when you have finished making changes.</p>
+<div class="guide-note">Forfeits are recorded by an authorised admin using Match administration. The current website does not automatically detect that a team has failed to attend or automatically award the forfeit.</div>
+</div>
+</details>
+<details class="guide-group">
+<summary>14 · What the website does not automate yet</summary>
+<div class="guide-group-body">
+<ul>
+<li><b>Roblox stat imports:</b> player stats must be entered by an admin; they are not pulled automatically from Practical Basketball.</li>
+<li><b>Match evidence checks:</b> the result form has an optional evidence/report field, but there is no built-in screenshot upload, opponent confirmation or dispute-resolution workflow yet.</li>
+<li><b>Automatic forfeits:</b> admins currently select the forfeit outcome in Match administration.</li>
+<li><b>Application decisions:</b> team, player and free-agent listings remain pending until staff review them.</li>
+</ul>
+<p>When something is missing, check whether the application has been approved and whether an admin has entered the relevant result or stats. For account access or a site error, contact EPL league staff through the official Discord server.</p>
+</div>
+</details>
+<div class="guide-actions"><button class="btn primary" data-goto="home">Back to Home</button><button class="btn" data-goto="register">Go to Registration</button><button class="btn" data-goto="rules">Open Rules</button></div>
 </section>
-
-<section class="page" id="page-rules"><div class="sectionhead"><div><div class="eyebrow">League office</div><h2>Rules & regulations</h2><p>Fair play. Competitive integrity. Respect.</p></div></div><div class="grid2"><div class="card"><h3>Competition basics</h3><p class="muted">The EPL is designed for European players competing in Roblox Practical Basketball. The league office should publish the official season format before fixtures begin.</p><ul class="muted"><li>Teams must register an approved roster.</li><li>Players must use their registered Roblox account.</li><li>Match results must be submitted with evidence if disputed.</li><li>Only authorised officials may confirm final scores.</li></ul></div><div class="card"><h3>Conduct & disputes</h3><ul class="muted"><li>Respect players, captains, officials and staff.</li><li>Harassment, cheating and match manipulation may result in discipline.</li><li>Captains must submit protests within the time limit set by league staff.</li><li>Admins should record decisions and apply rules consistently.</li></ul><div class="notice">These are starter rules, not a final rulebook. League owners should customise and approve them before launch.</div></div></div></section>
+<section class="page" id="page-rules">
+<div class="sectionhead"><div><div class="eyebrow">League office · Official handbook</div><h2>Rules &amp; regulations</h2><p>Fair play. Competitive integrity. Respect.</p></div><span class="pill">EPL COMPETITION POLICY</span></div>
+<div class="rules-layout">
+<article class="rules-panel"><h3>01 · Competition basics</h3><ul><li>The EPL is designed for European players competing in Roblox Practical Basketball.</li><li>The league office should publish the official season format before fixtures begin.</li><li>Teams must register an approved roster.</li><li>Players must use their registered Roblox account.</li></ul></article>
+<article class="rules-panel"><h3>02 · Match administration</h3><ul><li>Match results must be submitted with evidence if disputed.</li><li>Only authorised officials may confirm final scores.</li></ul></article>
+<article class="rules-panel"><h3>03 · Conduct &amp; respect</h3><ul><li>Respect players, captains, officials and staff.</li><li>Harassment, cheating and match manipulation may result in discipline.</li></ul></article>
+<article class="rules-panel"><h3>04 · Protests &amp; decisions</h3><ul><li>Captains must submit protests within the time limit set by league staff.</li><li>Admins should record decisions and apply rules consistently.</li></ul></article>
+</div>
+<div class="rules-warning"><strong>Important:</strong> These are starter rules, not a final rulebook. League owners should customise and approve them before launch.</div>
+</section>
 <section class="page" id="page-admin">
 <div class="card" id="adminLogin" style="max-width:560px;margin:35px auto;text-align:center">
-  <div class="eyebrow" style="justify-content:center">Restricted area</div>
-  <h2 style="margin:12px 0">EPL Admin Login</h2>
-  <p class="muted" style="line-height:1.7">Sign in with your Discord account. Only accounts personally approved by the league owner can enter the admin dashboard.</p>
-  <button class="btn primary" id="discordAdminLogin">Continue with Discord</button>
-  <p id="adminAuthMessage" class="tiny" role="status" aria-live="polite" style="margin-top:14px">You must be appointed as an EPL admin to continue.</p>
+<div class="eyebrow" style="justify-content:center">Restricted area</div>
+<h2 style="margin:12px 0">EPL Admin Login</h2>
+<p class="muted" style="line-height:1.7">Sign in with your Discord account. Only accounts personally approved by the league owner can enter the admin dashboard.</p>
+<button class="btn primary" id="discordAdminLogin">Continue with Discord</button>
+<p aria-live="polite" class="tiny" id="adminAuthMessage" role="status" style="margin-top:14px">You must be appointed as an EPL admin to continue.</p>
 </div>
-<div id="adminContent" class="hidden">
+<div class="hidden" id="adminContent">
 <div class="sectionhead"><div><div class="eyebrow">League operations</div><h2>Admin dashboard</h2><p>Manage EPL registrations, fixtures and player statistics.</p></div><div style="display:flex;gap:8px;align-items:center"><span class="pill">APPROVED ADMIN</span><button class="btn" id="adminSignOut">Sign out</button></div></div>
 <div class="notice">This dashboard now uses the shared EPL database. Only approved registrations appear on the public website and can be scheduled.</div>
 <div class="grid2" style="margin-top:16px">
 <div class="card"><h3>Pending team registrations</h3><div id="pendingTeams"></div></div>
 <div class="card"><h3>Pending free-agent registrations</h3><div id="pendingAgents"></div></div>
 <div class="card"><h3>Pending player registrations</h3><div id="pendingPlayers"></div></div>
-<div class="card"><h3>Schedule a fixture</h3><div class="formgrid"><div class="field"><label>Home team</label><select id="matchHome"></select></div><div class="field"><label>Away team</label><select id="matchAway"></select></div><div class="field"><label>Date & time</label><input id="matchDate" type="datetime-local"></div><div class="field"><label>Match note</label><input id="matchNote" placeholder="Week 1 · Regular season"></div></div><div class="formactions"><button class="btn primary" id="createFixture">Create fixture</button></div><div id="matchMsg" class="success"></div></div>
-<div class="card"><h3>Record a match result</h3><div class="formgrid"><div class="field"><label>Fixture</label><select id="resultMatch"></select></div><div class="field"><label>Home score</label><input id="homeScore" type="number" min="0" placeholder="0"></div><div class="field"><label>Away score</label><input id="awayScore" type="number" min="0" placeholder="0"></div><div class="field" style="grid-column:1/-1"><label>Evidence / match report (optional)</label><input id="evidence" placeholder="URL or notes"></div></div><div class="formactions"><button class="btn primary" id="saveResult">Save final score</button></div><div id="resultMsg" class="success"></div></div>
-<div class="card"><h3>Record player stats manually</h3><p class="muted">Choose a game and an approved player, then enter their stats for that game.</p><div class="formgrid"><div class="field"><label>Match</label><select id="statMatch"></select></div><div class="field"><label>Player</label><select id="statPlayer"></select></div><div class="field"><label>Points</label><input id="stat_points" type="number" min="0" value="0"></div><div class="field"><label>Rebounds</label><input id="stat_rebounds" type="number" min="0" value="0"></div><div class="field"><label>Assists</label><input id="stat_assists" type="number" min="0" value="0"></div><div class="field"><label>Steals</label><input id="stat_steals" type="number" min="0" value="0"></div><div class="field"><label>Blocks</label><input id="stat_blocks" type="number" min="0" value="0"></div><div class="field"><label>Turnovers</label><input id="stat_turnovers" type="number" min="0" value="0"></div><div class="field"><label>Fouls</label><input id="stat_fouls" type="number" min="0" value="0"></div><div class="field"><label>Minutes played</label><input id="stat_minutes" type="number" min="0" step="0.5" value="0"></div></div><div class="formactions"><button class="btn primary" id="savePlayerStats">Save player stats</button></div><div id="statsMsg" class="success"></div></div>
-<div class="card"><h3>Publish league news</h3><div class="formgrid"><div class="field"><label>Headline</label><input id="newsTitle" maxlength="120" placeholder="League announcement"></div><div class="field"><label>Category</label><select id="newsCategory"><option>Announcement</option><option>Matchday</option><option>Discipline</option><option>Competition</option></select></div><div class="field" style="grid-column:1/-1"><label>Article</label><textarea id="newsBody" maxlength="5000" placeholder="Write the update..."></textarea></div></div><button class="btn primary" id="publishNews">Publish announcement</button><p id="newsAdminMsg" class="tiny"></p></div>
-<div class="card"><h3>Manage teams</h3><div class="field"><label>Approved team</label><select id="manageTeam"><option value="">Select team</option></select></div><div class="formgrid" style="margin-top:10px"><div class="field"><label>Team name</label><input id="editTeamName"></div><div class="field"><label>Short code</label><input id="editTeamCode" maxlength="4"></div><div class="field"><label>Region</label><input id="editTeamRegion"></div><div class="field"><label>Captain name</label><input id="editTeamCaptain"></div></div><button class="btn primary" id="saveTeamDetails">Save team details</button><p id="teamAdminMsg" class="tiny"></p></div>
-<div class="card"><h3>Match administration</h3><p class="muted">Record normal scores, award a forfeit, or cancel a fixture.</p><div class="formgrid"><div class="field"><label>Fixture</label><select id="manageMatch"><option value="">Select fixture</option></select></div><div class="field"><label>Action / result</label><select id="matchAdminType"><option value="played">Normal result</option><option value="home_forfeit">Home team forfeits</option><option value="away_forfeit">Away team forfeits</option><option value="double_forfeit">Double forfeit</option><option value="cancelled">Cancel fixture</option><option value="upcoming">Reopen as upcoming</option></select></div><div class="field"><label>Home score (normal result only)</label><input id="manageHomeScore" type="number" min="0" value="0"></div><div class="field"><label>Away score (normal result only)</label><input id="manageAwayScore" type="number" min="0" value="0"></div><div class="field" style="grid-column:1/-1"><label>Admin note</label><input id="manageMatchNote" maxlength="500"></div></div><button class="btn primary" id="applyMatchAdmin">Apply match update</button><p id="matchAdminMsg" class="tiny"></p></div>
-<div class="card"><h3>Discipline record</h3><div class="formgrid"><div class="field"><label>Subject</label><select id="disciplineSubjectType"><option value="team">Team</option><option value="player">Player</option></select></div><div class="field"><label>Subject</label><select id="disciplineSubject"><option value="">Select</option></select></div><div class="field"><label>Action</label><select id="disciplineAction"><option value="warning">Warning</option><option value="suspension">Suspension</option><option value="fine">Fine</option><option value="ban">Ban</option><option value="note">Official note</option></select></div><div class="field"><label>Details</label><textarea id="disciplineDetails" maxlength="1500"></textarea></div></div><button class="btn primary" id="saveDiscipline">Save discipline record</button><p id="disciplineMsg" class="tiny"></p></div>
-<div class="card"><h3>Shared database status</h3><p class="muted">Teams, registrations, fixtures, results and individual game stats are saved centrally in Supabase, not in this browser.</p><div id="adminDataMsg" class="success"></div></div>
+<div class="card"><h3>Schedule a fixture</h3><div class="formgrid"><div class="field"><label>Home team</label><select id="matchHome"></select></div><div class="field"><label>Away team</label><select id="matchAway"></select></div><div class="field"><label>Date &amp; time</label><input id="matchDate" type="datetime-local"/></div><div class="field"><label>Match note</label><input id="matchNote" placeholder="Week 1 · Regular season"/></div></div><div class="formactions"><button class="btn primary" id="createFixture">Create fixture</button></div><div class="success" id="matchMsg"></div></div>
+<div class="card"><h3>Record a match result</h3><div class="formgrid"><div class="field"><label>Fixture</label><select id="resultMatch"></select></div><div class="field"><label>Home score</label><input id="homeScore" min="0" placeholder="0" type="number"/></div><div class="field"><label>Away score</label><input id="awayScore" min="0" placeholder="0" type="number"/></div><div class="field" style="grid-column:1/-1"><label>Evidence / match report (optional)</label><input id="evidence" placeholder="URL or notes"/></div></div><div class="formactions"><button class="btn primary" id="saveResult">Save final score</button></div><div class="success" id="resultMsg"></div></div>
+<div class="card"><h3>Record player stats manually</h3><p class="muted">Choose a game and an approved player, then enter their stats for that game.</p><div class="formgrid"><div class="field"><label>Match</label><select id="statMatch"></select></div><div class="field"><label>Player</label><select id="statPlayer"></select></div><div class="field"><label>Points</label><input id="stat_points" min="0" type="number" value="0"/></div><div class="field"><label>Rebounds</label><input id="stat_rebounds" min="0" type="number" value="0"/></div><div class="field"><label>Assists</label><input id="stat_assists" min="0" type="number" value="0"/></div><div class="field"><label>Steals</label><input id="stat_steals" min="0" type="number" value="0"/></div><div class="field"><label>Blocks</label><input id="stat_blocks" min="0" type="number" value="0"/></div><div class="field"><label>Turnovers</label><input id="stat_turnovers" min="0" type="number" value="0"/></div><div class="field"><label>Fouls</label><input id="stat_fouls" min="0" type="number" value="0"/></div><div class="field"><label>Minutes played</label><input id="stat_minutes" min="0" step="0.5" type="number" value="0"/></div></div><div class="formactions"><button class="btn primary" id="savePlayerStats">Save player stats</button></div><div class="success" id="statsMsg"></div></div>
+<div class="card"><h3>Publish league news</h3><div class="formgrid"><div class="field"><label>Headline</label><input id="newsTitle" maxlength="120" placeholder="League announcement"/></div><div class="field"><label>Category</label><select id="newsCategory"><option>Announcement</option><option>Matchday</option><option>Discipline</option><option>Competition</option></select></div><div class="field" style="grid-column:1/-1"><label>Article</label><textarea id="newsBody" maxlength="5000" placeholder="Write the update..."></textarea></div></div><button class="btn primary" id="publishNews">Publish announcement</button><p class="tiny" id="newsAdminMsg"></p></div>
+<div class="card"><h3>Manage teams</h3><div class="field"><label>Approved team</label><select id="manageTeam"><option value="">Select team</option></select></div><div class="formgrid" style="margin-top:10px"><div class="field"><label>Team name</label><input id="editTeamName"/></div><div class="field"><label>Short code</label><input id="editTeamCode" maxlength="4"/></div><div class="field"><label>Region</label><input id="editTeamRegion"/></div><div class="field"><label>Captain name</label><input id="editTeamCaptain"/></div></div><button class="btn primary" id="saveTeamDetails">Save team details</button><p class="tiny" id="teamAdminMsg"></p></div>
+<div class="card"><h3>Match administration</h3><p class="muted">Record normal scores, award a forfeit, or cancel a fixture.</p><div class="formgrid"><div class="field"><label>Fixture</label><select id="manageMatch"><option value="">Select fixture</option></select></div><div class="field"><label>Action / result</label><select id="matchAdminType"><option value="played">Normal result</option><option value="home_forfeit">Home team forfeits</option><option value="away_forfeit">Away team forfeits</option><option value="double_forfeit">Double forfeit</option><option value="cancelled">Cancel fixture</option><option value="upcoming">Reopen as upcoming</option></select></div><div class="field"><label>Home score (normal result only)</label><input id="manageHomeScore" min="0" type="number" value="0"/></div><div class="field"><label>Away score (normal result only)</label><input id="manageAwayScore" min="0" type="number" value="0"/></div><div class="field" style="grid-column:1/-1"><label>Admin note</label><input id="manageMatchNote" maxlength="500"/></div></div><button class="btn primary" id="applyMatchAdmin">Apply match update</button><p class="tiny" id="matchAdminMsg"></p></div>
+<div class="card"><h3>Discipline record</h3><div class="formgrid"><div class="field"><label>Subject</label><select id="disciplineSubjectType"><option value="team">Team</option><option value="player">Player</option></select></div><div class="field"><label>Subject</label><select id="disciplineSubject"><option value="">Select</option></select></div><div class="field"><label>Action</label><select id="disciplineAction"><option value="warning">Warning</option><option value="suspension">Suspension</option><option value="fine">Fine</option><option value="ban">Ban</option><option value="note">Official note</option></select></div><div class="field"><label>Details</label><textarea id="disciplineDetails" maxlength="1500"></textarea></div></div><button class="btn primary" id="saveDiscipline">Save discipline record</button><p class="tiny" id="disciplineMsg"></p></div>
+<div class="card"><h3>Shared database status</h3><p class="muted">Teams, registrations, fixtures, results and individual game stats are saved centrally in Supabase, not in this browser.</p><div class="success" id="adminDataMsg"></div></div>
 </div></div></section>
 </main><footer class="footer">EUROPEAN PRO LEAGUE · EPL <span style="color:#e9bd58">★</span> Built for European Roblox basketball. Unofficial community league.</footer>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
