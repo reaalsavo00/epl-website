@@ -160,7 +160,77 @@
     if($('manageMatch'))$('manageMatch').innerHTML='<option value="">Select fixture</option>'+state.matches.map(m=>`<option value="${m.id}">${esc(matchName(m))} · ${esc(m.status)}</option>`).join('');
     if($('disciplineSubject'))$('disciplineSubject').innerHTML='<option value="">Select</option>'+[...state.teams.map(t=>({id:t.id,name:t.team_name,type:'team'})),...state.players.map(p=>({id:p.id,name:p.display_name,type:'player'}))].map(x=>`<option data-type="${x.type}" value="${x.id}">${esc(x.name)}</option>`).join('');
   }
-  window.loadEplAdmin=async()=>{await loadPublic();await loadAdmin();};
+
+  // Practical Basketball admin tools: screenshot intake + safe data maintenance.
+  function installPbAdminTools(){
+    const root=document.getElementById('adminContent');
+    if(!root || document.getElementById('pbAdminTools')) return;
+    const tools=document.createElement('section');
+    tools.id='pbAdminTools';
+    tools.innerHTML=`
+      <div class="card" style="margin-top:16px">
+        <h3>Match box-score screenshot</h3>
+        <p class="muted">Upload a match screenshot. Text is read in your browser and shown for admin checking before you enter or approve stats. OCR can misread small numbers, so always compare it with the original image.</p>
+        <input id="pbScoreImage" type="file" accept="image/png,image/jpeg,image/webp">
+        <div id="pbScorePreview" style="margin:12px 0"></div>
+        <button class="btn primary" id="pbRunOcr" type="button">Read screenshot</button>
+        <p class="tiny" id="pbOcrStatus" aria-live="polite"></p>
+        <textarea id="pbOcrText" rows="7" style="width:100%;margin-top:8px" placeholder="Recognised box-score text will appear here for review"></textarea>
+        <p class="tiny">Expected columns: PTS, AST, REB, BLK, STL, FGS, 3PS, FTS, TOV, FLS, +/-.</p>
+      </div>
+      <div class="card" style="margin-top:16px">
+        <h3>Database data management</h3>
+        <p class="muted">Delete selected league records from Supabase. This does not delete admin appointments, Discord accounts, settings or storage files.</p>
+        <div class="field"><label>Data category</label>
+          <select id="pbClearCategory">
+            <option value="matches">Fixtures and match results</option>
+            <option value="stats">Player game statistics</option>
+            <option value="players">Player registrations</option>
+            <option value="free_agents">Free-agent registrations</option>
+            <option value="teams">Team registrations</option>
+            <option value="news">League news</option>
+            <option value="discipline">Discipline records</option>
+            <option value="disputes">Disputes</option>
+          </select>
+        </div>
+        <button class="btn" id="pbClearData" type="button" style="margin-top:10px">Delete selected category</button>
+        <p class="tiny" id="pbClearStatus" aria-live="polite"></p>
+      </div>`;
+    root.appendChild(tools);
+    const file=document.getElementById('pbScoreImage');
+    file.addEventListener('change',()=>{
+      const f=file.files?.[0],preview=document.getElementById('pbScorePreview');
+      if(!f){preview.innerHTML='';return;}
+      if(f.size>8*1024*1024){file.value='';preview.textContent='Please choose an image smaller than 8 MB.';return;}
+      const url=URL.createObjectURL(f);
+      preview.innerHTML=`<img src="${url}" alt="Uploaded box score preview" style="max-width:100%;max-height:420px;object-fit:contain;border:1px solid #dce4f1;border-radius:10px">`;
+    });
+    document.getElementById('pbRunOcr').addEventListener('click',async()=>{
+      const f=file.files?.[0],status=document.getElementById('pbOcrStatus'),target=document.getElementById('pbOcrText');
+      if(!f){status.textContent='Choose a screenshot first.';return;}
+      status.textContent='Loading OCR engine…';
+      try{
+        if(!window.Tesseract){
+          await new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';s.onload=resolve;s.onerror=reject;document.head.appendChild(s);});
+        }
+        status.textContent='Reading screenshot. This may take a little while…';
+        const result=await window.Tesseract.recognize(f,'eng',{logger:m=>{if(m.status==='recognizing text')status.textContent=`Reading screenshot… ${Math.round((m.progress||0)*100)}%`;}});
+        target.value=result.data.text||'No text recognised. Try a clearer screenshot.';
+        status.textContent='OCR finished. Check every username and number against the screenshot before saving stats.';
+      }catch(e){status.textContent='OCR could not run: '+(e.message||'Please try again.');}
+    });
+    document.getElementById('pbClearData').addEventListener('click',async()=>{
+      const category=document.getElementById('pbClearCategory').value;
+      const label=document.getElementById('pbClearCategory').selectedOptions[0].textContent;
+      if(!confirm(`This will permanently delete ${label.toLowerCase()} from the league database. Continue?`))return;
+      if(!confirm('Final confirmation: this cannot be undone. Delete this category?'))return;
+      const status=document.getElementById('pbClearStatus');status.textContent='Deleting…';
+      try{await adminApi({action:'admin-clear-data',category});status.textContent=`${label} deleted.`;await loadPublic();await loadAdmin();}
+      catch(e){status.textContent='Could not delete records: '+e.message;}
+    });
+  }
+
+  window.loadEplAdmin=async()=>{await loadPublic();await loadAdmin();installPbAdminTools();};
   $('createFixture').onclick=async()=>{try{await adminApi({action:'create-match',home_team_id:$('matchHome').value,away_team_id:$('matchAway').value,scheduled_at:$('matchDate').value?new Date($('matchDate').value).toISOString():null,match_note:$('matchNote').value});say('matchMsg','Fixture saved to the shared EPL database.');$('matchDate').value='';$('matchNote').value='';await loadPublic();await loadAdmin();}catch(e){say('matchMsg','⚠️ '+e.message);}};
   $('saveResult').onclick=async()=>{try{await adminApi({action:'save-result',match_id:$('resultMatch').value,home_score:$('homeScore').value,away_score:$('awayScore').value,evidence:$('evidence').value});say('resultMsg','Result saved. Public standings have updated.');$('homeScore').value='';$('awayScore').value='';$('evidence').value='';await loadPublic();await loadAdmin();}catch(e){say('resultMsg','⚠️ '+e.message);}};
   $('statMatch')?.addEventListener('change',renderStatPlayerOptions);
@@ -168,7 +238,7 @@
     if(!$('statMatch').value)throw new Error('Select a match first.');
     if(!$('statPlayer').value)throw new Error('Select a player from one of the teams in this match.');
     const body={action:'save-player-stats',match_id:$('statMatch').value,player_registration_id:$('statPlayer').value};
-    ['points','rebounds','assists','steals','blocks','turnovers','fouls','minutes'].forEach(k=>body[k]=$('stat_'+k).value);
+    ['points','rebounds','assists','steals','blocks','turnovers','fouls','minutes','fgs','three_ps','fts','plus_minus'].forEach(k=>body[k]=$('stat_'+k).value);
     await adminApi(body);say('statsMsg','Player stats saved for this game.');await loadPublic();
   }catch(e){say('statsMsg','⚠️ '+e.message);}};
   $('manageTeam')?.addEventListener('change',()=>{const t=state.teams.find(x=>x.id===$('manageTeam').value);if(!t)return;$('editTeamName').value=t.team_name||'';$('editTeamCode').value=t.short_code||'';$('editTeamRegion').value=t.region||'';$('editTeamCaptain').value=t.captain_name||'';});
