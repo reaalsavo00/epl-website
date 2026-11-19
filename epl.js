@@ -25,23 +25,11 @@
   // Roblox's public web APIs do not expose browser CORS headers. Use a GET-only
   // CORS bridge for the public username search and thumbnail JSON; the image
   // itself is then loaded directly from Roblox's CDN in the <img> element.
-  // Roblox's public endpoints may block direct browser requests through CORS.
-  // Try several read-only bridges rather than relying on one proxy host.
+  const ROBLOX_CORS_BRIDGE='https://proxy.cors.dev/';
   async function robloxPublicGet(url){
-    const targets=[
-      'https://corsproxy.io/?url='+encodeURIComponent(url),
-      'https://api.allorigins.win/raw?url='+encodeURIComponent(url),
-      'https://proxy.cors.dev/'+url
-    ];
-    let lastError;
-    for(const target of targets){
-      try{
-        const response=await fetch(target,{headers:{Accept:'application/json'},credentials:'omit',cache:'no-store'});
-        if(!response.ok)throw new Error(`Roblox lookup returned ${response.status}`);
-        return await response.json();
-      }catch(error){lastError=error;}
-    }
-    throw lastError||new Error('Could not reach Roblox public APIs.');
+    const response=await fetch(ROBLOX_CORS_BRIDGE+url,{headers:{Accept:'application/json'},credentials:'omit'});
+    if(!response.ok)throw new Error(`Roblox lookup returned ${response.status}`);
+    return response.json();
   }
   async function getAvatar(username){
     const name=String(username||'').trim();
@@ -109,9 +97,24 @@
     const played=state.matches.filter(m=>m.status==='played'&&(m.home_team_id===teamId||m.away_team_id===teamId)).sort((a,b)=>String(b.scheduled_at||'').localeCompare(String(a.scheduled_at||'')));
     const recent=played.slice(0,5);
     const matchRows=recent.map(m=>{const isHome=m.home_team_id===teamId,opponent=team(isHome?m.away_team_id:m.home_team_id),forScore=isHome?m.home_score:m.away_score,against=isHome?m.away_score:m.home_score;return `<div class="team-profile-match"><span>${esc(fmt(m.scheduled_at))} · ${esc(opponent.team_name)}</span><b>${forScore}–${against} ${forScore>against?'W':forScore<against?'L':'D'}</b></div>`;}).join('')||'<div class="empty">No completed matches recorded yet.</div>';
-    const playersHtml=roster.map(p=>{const playerRows=state.stats.filter(x=>x.player_registration_id===p.id).filter(x=>recent.some(m=>m.id===x.match_id));const sum=k=>playerRows.reduce((n,x)=>n+(Number(x[k])||0),0);return `<div class="team-profile-player"><div class="team-profile-player-info">${playerAvatar(p,'team-roster-avatar')}<div class="team-profile-player-copy"><b>${esc(p.display_name)}</b><div class="tiny">@${esc(p.roblox_username)} · ${esc(p.position||'Player')} · ${esc(p.roster_role||'Squad')}</div></div></div><div class="team-profile-player-stats"><span class="player-stat"><b>${sum('points')}</b><small>PTS</small></span><span class="player-stat"><b>${sum('rebounds')}</b><small>REB</small></span><span class="player-stat"><b>${sum('assists')}</b><small>AST</small></span><span class="player-stat"><b>${sum('steals')}</b><small>STL</small></span><span class="player-stat"><b>${sum('blocks')}</b><small>BLK</small></span><span class="player-stat-note">Last ${recent.length} team games</span></div></div>`;}).join('')||'<div class="empty">No approved players are currently linked to this team.</div>';
+    const playersHtml=roster.map(p=>{const playerRows=state.stats.filter(x=>x.player_registration_id===p.id).filter(x=>recent.some(m=>m.id===x.match_id));const sum=k=>playerRows.reduce((n,x)=>n+(Number(x[k])||0),0);return `<button type="button" class="team-profile-player pb-player-open" data-player-id="${esc(p.id)}" data-player-kind="player"><span class="team-profile-player-info">${playerAvatar(p,'team-roster-avatar')}<span class="team-profile-player-copy"><b>${esc(p.display_name)}</b><span class="tiny">@${esc(p.roblox_username)} · ${esc(p.position||'Player')} · ${esc(p.roster_role||'Squad')}</span></span></span><span class="team-profile-player-stats"><span class="player-stat"><b>${sum('points')}</b><small>PTS</small></span><span class="player-stat"><b>${sum('rebounds')}</b><small>REB</small></span><span class="player-stat"><b>${sum('assists')}</b><small>AST</small></span><span class="player-stat"><b>${sum('steals')}</b><small>STL</small></span><span class="player-stat"><b>${sum('blocks')}</b><small>BLK</small></span><span class="player-stat-note">Last ${recent.length} team games</span></span></button>`;}).join('')||'<div class="empty">No approved players are currently linked to this team.</div>';
     panel.innerHTML=`<div class="team-profile-head">${teamMark(t)}<div><div class="eyebrow">Team profile</div><h2 style="margin:5px 0">${esc(t.team_name)}</h2><p class="muted" style="margin:0">${esc(t.region||'Europe')} · Captain: ${esc(t.captain_name||'Not listed')}</p></div><button class="btn" type="button" id="closeTeamProfile" style="margin-left:auto">Close ✕</button></div><div class="team-profile-record"><div class="profile-metric"><strong>${record.played}</strong><span>GAMES</span></div><div class="profile-metric"><strong>${record.w}</strong><span>WINS</span></div><div class="profile-metric"><strong>${record.l}</strong><span>LOSSES</span></div><div class="profile-metric"><strong>${record.pf}</strong><span>PTS FOR</span></div><div class="profile-metric"><strong>${record.pa}</strong><span>PTS AGAINST</span></div><div class="profile-metric"><strong>${record.pts}</strong><span>TABLE PTS</span></div></div><div class="team-profile-content"><div class="team-profile-squad"><h3>Squad & recent player stats</h3><p class="profile-help">Player totals from the team's last ${recent.length} completed games. Stats appear when entered by league admins.</p>${playersHtml}</div><div class="team-profile-results"><h3>Recent results</h3>${matchRows}</div></div>`;
     panel.classList.remove('hidden');if(scroll)panel.scrollIntoView({behavior:'smooth',block:'start'});$('closeTeamProfile').onclick=()=>{openTeamProfileId=null;panel.classList.add('hidden');panel.innerHTML='';};
+  }
+  let activePlayerProfile=null;
+  function ensurePlayerProfileHost(){let host=$('pbPlayerProfile');if(!host){host=document.createElement('section');host.id='pbPlayerProfile';host.className='pb-profile-page hidden';document.querySelector('main.wrap')?.prepend(host);}return host;}
+  function playerTotals(p){const rows=state.stats.filter(x=>String(x.player_registration_id)===String(p.id));const sum=k=>rows.reduce((n,x)=>n+(Number(x[k])||0),0);return {games:new Set(rows.map(x=>x.match_id)).size,points:sum('points'),rebounds:sum('rebounds'),assists:sum('assists'),blocks:sum('blocks'),steals:sum('steals'),fgs:sum('fgs'),three_ps:sum('three_ps'),fts:sum('fts'),turnovers:sum('turnovers'),fouls:sum('fouls'),plus_minus:sum('plus_minus')};}
+  function renderPlayerProfile(p,kind='player',tab='overview'){
+    if(!p)return;activePlayerProfile={p,kind,tab};const host=ensurePlayerProfileHost();
+    const isAgent=kind==='agent'||!p.team_id;const t=state.teams.find(x=>String(x.id)===String(p.team_id))||state.teams.find(x=>x.team_name===p.team_name);const totals=playerTotals(p);
+    const gameRows=state.stats.filter(x=>String(x.player_registration_id)===String(p.id)).map(x=>({...x,match:state.matches.find(m=>String(m.id)===String(x.match_id))})).filter(x=>x.match).sort((a,b)=>String(b.match.scheduled_at||'').localeCompare(String(a.match.scheduled_at||''))).slice(0,5);
+    const avatar=p.avatar_url?`<img class="pb-profile-avatar" src="${esc(p.avatar_url)}" alt="${esc(p.roblox_username||p.display_name)} full Roblox avatar">`:`<div class="pb-profile-avatar pb-profile-avatar-fallback">${esc((p.display_name||'P').slice(0,1).toUpperCase())}</div>`;
+    const stats=[['PTS',totals.points],['AST',totals.assists],['REB',totals.rebounds],['BLK',totals.blocks],['STL',totals.steals],['FGS',totals.fgs],['3PS',totals.three_ps],['FTS',totals.fts],['TOV',totals.turnovers],['FLS',totals.fouls],['+/-',totals.plus_minus]];
+    const recent=gameRows.map(x=>{const m=x.match,home=team(m.home_team_id),away=team(m.away_team_id);return `<div class="pb-game-row"><div><small>${esc(fmt(m.scheduled_at))}</small><b>${esc(home.team_name)} <i>vs</i> ${esc(away.team_name)}</b></div><strong>${Number(x.points)||0} PTS</strong><span>${Number(x.rebounds)||0} REB</span><span>${Number(x.assists)||0} AST</span></div>`;}).join('')||'<div class="pb-empty">No recent games available.<small>Player game statistics will appear here after completed games.</small></div>';
+    host.innerHTML=`<div class="pb-profile-topline"><button type="button" class="pb-back" id="pbProfileBack">← BACK TO PLAYERS</button><span>OFFICIAL PLAYER PROFILE</span></div><section class="pb-profile-hero"><div class="pb-profile-avatar-wrap">${avatar}</div><div class="pb-profile-identity"><div class="pb-profile-kicker">EPBL PLAYER PROFILE</div><h1>${esc(p.display_name||p.roblox_username||'Player')}</h1><p class="pb-position">${esc((p.position||'POSITION NOT SET').toUpperCase())}</p><div class="pb-profile-team">${t?teamMark(t):'<span class="pb-free-agent-mark">FA</span>'}<span>${esc(t?.team_name||'Free Agent')}</span></div><div class="pb-profile-id">ROBLOX ID <b>${esc(p.roblox_user_id||'Not available')}</b> <span>·</span> @${esc(p.roblox_username||'Unknown')}</div></div></section><nav class="pb-profile-tabs"><button data-profile-tab="overview" class="${tab==='overview'?'active':''}">OVERVIEW</button><button data-profile-tab="stats" class="${tab==='stats'?'active':''}">STATS</button></nav><section class="pb-profile-section ${tab==='overview'?'':'hidden'}"><h2>PLAYER INFORMATION</h2><div class="pb-info-grid"><div><small>PLAYER</small><b>${esc(p.display_name||'—')}</b></div><div><small>POSITION</small><b>${esc(p.position||'Not set')}</b></div><div><small>TEAM</small><b>${esc(t?.team_name||'Free Agent')}</b></div></div><div class="pb-recent-heading"><div><h2>RECENT GAMES</h2><p>Last five completed games</p></div></div><div class="pb-games">${recent}</div></section><section class="pb-profile-section ${tab==='stats'?'':'hidden'}"><h2>SEASON STATISTICS</h2><div class="pb-stat-grid"><div><small>GAMES</small><b>${totals.games}</b></div>${stats.map(([label,value])=>`<div><small>${label}</small><b>${value}</b></div>`).join('')}</div><div class="pb-recent-heading"><div><h2>GAME LOG</h2><p>Recorded match performances</p></div></div><div class="pb-games">${recent}</div></section>`;
+    host.classList.remove('hidden');document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));document.querySelectorAll('[data-page]').forEach(x=>x.classList.remove('active'));window.scrollTo({top:0,behavior:'smooth'});
+    $('pbProfileBack').onclick=()=>{host.classList.add('hidden');if(kind==='agent')setPage('freeagents');else setPage('players');};
+    host.querySelectorAll('[data-profile-tab]').forEach(b=>b.onclick=()=>renderPlayerProfile(p,kind,b.dataset.profileTab));
   }
   function renderPublic(){
     const played=state.matches.filter(m=>m.status==='played'); $('statTeams').textContent=state.teams.length; $('statPlayed').textContent=played.length; $('statPlayers').textContent=state.players.length+state.freeAgents.length;
@@ -124,7 +127,7 @@
     const newsHtml=(state.news||[]).map(n=>`<article class="newsitem"><span class="pill">${esc(n.category||'Announcement')}</span><h4>${esc(n.title)}</h4><p>${esc(n.body)}</p><small class="tiny">${esc(fmt(n.created_at))}</small></article>`).join('')||'<div class="empty">No announcements yet.</div>'; if($('newsList'))$('newsList').innerHTML=newsHtml;if($('homeNews'))$('homeNews').innerHTML=(state.news||[]).slice(0,3).map(n=>`<div class="card"><span class="pill">${esc(n.category||'News')}</span><h3 style="margin-top:12px">${esc(n.title)}</h3><p class="muted">${esc(n.body.slice(0,180))}</p></div>`).join('')||'<div class="card empty">League announcements will appear here.</div>';
     const teamSelect=$('regPlayerTeam'); if(teamSelect){const current=teamSelect.value;teamSelect.innerHTML='<option value="">Free Agent / no team</option>'+state.teams.map(t=>`<option value="${t.id}">${esc(t.team_name)}</option>`).join('');teamSelect.value=current;}
   }
-  function playerCard(p,isAgent=false){const teamName=isAgent?'Free Agent':(p.team_name||'Free Agent');return `<div class="epl-player-row">${playerAvatar(p)}<div class="epl-player-info"><b>${esc(p.display_name)}</b><span>@${esc(p.roblox_username)} · ${esc(teamName)}</span><small>${esc(p.position||'Player')}</small></div><div class="epl-player-stats">${statSummary(p.id)}</div></div>`;}
+  function playerCard(p,isAgent=false){const teamName=isAgent?'Free Agent':(p.team_name||'Free Agent');return `<button type="button" class="epl-player-row pb-player-open" data-player-id="${esc(p.id)}" data-player-kind="${isAgent?'agent':'player'}">${playerAvatar(p,'pb-list-avatar')}<span class="epl-player-info"><b>${esc(p.display_name)}</b><span>@${esc(p.roblox_username)} · ${esc(teamName)}</span><small>${esc(p.position||'Player')}</small></span><span class="epl-player-stats">${statSummary(p.id)}</span><span class="pb-view-profile">VIEW PROFILE ↗</span></button>`;}
   function statSummary(id){const rows=state.stats.filter(s=>s.player_registration_id===id);if(!rows.length)return '<span class="tiny">No stats recorded yet</span>';const sum=k=>rows.reduce((n,r)=>n+(Number(r[k])||0),0);return `<span><b>${sum('points')}</b> PTS</span><span><b>${sum('rebounds')}</b> REB</span><span><b>${sum('assists')}</b> AST</span><span><b>${sum('steals')}</b> STL</span><span><b>${sum('blocks')}</b> BLK</span><span><b>${sum('turnovers')}</b> TO</span><span><b>${sum('fouls')}</b> PF</span><span><b>${sum('minutes')}</b> MIN</span>`;}
   function renderPlayers(){const q=($('playerSearch')?.value||'').toLowerCase();const list=state.players.filter(p=>(p.display_name+' '+p.roblox_username+' '+(p.team_name||'')).toLowerCase().includes(q));$('playersTable').innerHTML=list.map(p=>playerCard(p,false)).join('')||'<div class="empty">No players match that search.</div>';}
   function renderAgents(){const q=($('agentSearch')?.value||'').toLowerCase();const list=state.freeAgents.filter(p=>(p.display_name+' '+p.roblox_username).toLowerCase().includes(q));$('freeAgentsList').innerHTML=list.map(p=>playerCard(p,true)).join('')||'<div class="empty">No approved free agents yet.</div>';}
@@ -133,7 +136,7 @@
   window.eplPage=setPage;
   document.querySelectorAll('[data-page]').forEach(b=>b.addEventListener('click',()=>setPage(b.dataset.page)));
   document.querySelectorAll('[data-goto]').forEach(b=>b.addEventListener('click',()=>setPage(b.dataset.goto)));
-  document.addEventListener('click',e=>{const b=e.target.closest('[data-team-profile]');if(b)renderTeamProfile(b.dataset.teamProfile);});
+  document.addEventListener('click',e=>{const playerButton=e.target.closest('[data-player-id]');if(playerButton){const kind=playerButton.dataset.playerKind||'player';const list=kind==='agent'?state.freeAgents:state.players;const p=list.find(x=>String(x.id)===String(playerButton.dataset.playerId))||state.players.find(x=>String(x.id)===String(playerButton.dataset.playerId));if(p){if(!p.avatar_url&&p.roblox_username)getAvatar(p.roblox_username).then(a=>{if(a){p.roblox_user_id=a.userId;p.avatar_url=a.imageUrl;if(activePlayerProfile?.p===p)renderPlayerProfile(p,kind,activePlayerProfile.tab);}});renderPlayerProfile(p,kind);}return;}const b=e.target.closest('[data-team-profile]');if(b)renderTeamProfile(b.dataset.teamProfile);});
   $('adminNav').onclick=()=>window.openEplAdmin?.(); $('fixtureFilter').onchange=renderPublic;
   $('playerSearch').addEventListener('input',renderPlayers); $('agentSearch').addEventListener('input',renderAgents);
   async function uploadLogo(file){if(!file)return null;if(!['image/png','image/jpeg','image/webp'].includes(file.type)||file.size>2*1024*1024)throw new Error('Logo must be PNG, JPG or WEBP and under 2 MB.');const ext=file.type==='image/png'?'png':file.type==='image/webp'?'webp':'jpg';const path=`team-logos/${crypto.randomUUID()}.${ext}`;const {error}=await sb.storage.from('epl-team-logos').upload(path,file,{contentType:file.type,upsert:false});if(error)throw error;return sb.storage.from('epl-team-logos').getPublicUrl(path).data.publicUrl;}
@@ -172,7 +175,77 @@
     if($('manageMatch'))$('manageMatch').innerHTML='<option value="">Select fixture</option>'+state.matches.map(m=>`<option value="${m.id}">${esc(matchName(m))} · ${esc(m.status)}</option>`).join('');
     if($('disciplineSubject'))$('disciplineSubject').innerHTML='<option value="">Select</option>'+[...state.teams.map(t=>({id:t.id,name:t.team_name,type:'team'})),...state.players.map(p=>({id:p.id,name:p.display_name,type:'player'}))].map(x=>`<option data-type="${x.type}" value="${x.id}">${esc(x.name)}</option>`).join('');
   }
-  window.loadEplAdmin=async()=>{await loadPublic();await loadAdmin();};
+
+  // Practical Basketball admin tools: screenshot intake + safe data maintenance.
+  function installPbAdminTools(){
+    const root=document.getElementById('adminContent');
+    if(!root || document.getElementById('pbAdminTools')) return;
+    const tools=document.createElement('section');
+    tools.id='pbAdminTools';
+    tools.innerHTML=`
+      <div class="card" style="margin-top:16px">
+        <h3>Match box-score screenshot</h3>
+        <p class="muted">Upload a match screenshot. Text is read in your browser and shown for admin checking before you enter or approve stats. OCR can misread small numbers, so always compare it with the original image.</p>
+        <input id="pbScoreImage" type="file" accept="image/png,image/jpeg,image/webp">
+        <div id="pbScorePreview" style="margin:12px 0"></div>
+        <button class="btn primary" id="pbRunOcr" type="button">Read screenshot</button>
+        <p class="tiny" id="pbOcrStatus" aria-live="polite"></p>
+        <textarea id="pbOcrText" rows="7" style="width:100%;margin-top:8px" placeholder="Recognised box-score text will appear here for review"></textarea>
+        <p class="tiny">Expected columns: PTS, AST, REB, BLK, STL, FGS, 3PS, FTS, TOV, FLS, +/-.</p>
+      </div>
+      <div class="card" style="margin-top:16px">
+        <h3>Database data management</h3>
+        <p class="muted">Delete selected league records from Supabase. This does not delete admin appointments, Discord accounts, settings or storage files.</p>
+        <div class="field"><label>Data category</label>
+          <select id="pbClearCategory">
+            <option value="matches">Fixtures and match results</option>
+            <option value="stats">Player game statistics</option>
+            <option value="players">Player registrations</option>
+            <option value="free_agents">Free-agent registrations</option>
+            <option value="teams">Team registrations</option>
+            <option value="news">League news</option>
+            <option value="discipline">Discipline records</option>
+            <option value="disputes">Disputes</option>
+          </select>
+        </div>
+        <button class="btn" id="pbClearData" type="button" style="margin-top:10px">Delete selected category</button>
+        <p class="tiny" id="pbClearStatus" aria-live="polite"></p>
+      </div>`;
+    root.appendChild(tools);
+    const file=document.getElementById('pbScoreImage');
+    file.addEventListener('change',()=>{
+      const f=file.files?.[0],preview=document.getElementById('pbScorePreview');
+      if(!f){preview.innerHTML='';return;}
+      if(f.size>8*1024*1024){file.value='';preview.textContent='Please choose an image smaller than 8 MB.';return;}
+      const url=URL.createObjectURL(f);
+      preview.innerHTML=`<img src="${url}" alt="Uploaded box score preview" style="max-width:100%;max-height:420px;object-fit:contain;border:1px solid #dce4f1;border-radius:10px">`;
+    });
+    document.getElementById('pbRunOcr').addEventListener('click',async()=>{
+      const f=file.files?.[0],status=document.getElementById('pbOcrStatus'),target=document.getElementById('pbOcrText');
+      if(!f){status.textContent='Choose a screenshot first.';return;}
+      status.textContent='Loading OCR engine…';
+      try{
+        if(!window.Tesseract){
+          await new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';s.onload=resolve;s.onerror=reject;document.head.appendChild(s);});
+        }
+        status.textContent='Reading screenshot. This may take a little while…';
+        const result=await window.Tesseract.recognize(f,'eng',{logger:m=>{if(m.status==='recognizing text')status.textContent=`Reading screenshot… ${Math.round((m.progress||0)*100)}%`;}});
+        target.value=result.data.text||'No text recognised. Try a clearer screenshot.';
+        status.textContent='OCR finished. Check every username and number against the screenshot before saving stats.';
+      }catch(e){status.textContent='OCR could not run: '+(e.message||'Please try again.');}
+    });
+    document.getElementById('pbClearData').addEventListener('click',async()=>{
+      const category=document.getElementById('pbClearCategory').value;
+      const label=document.getElementById('pbClearCategory').selectedOptions[0].textContent;
+      if(!confirm(`This will permanently delete ${label.toLowerCase()} from the league database. Continue?`))return;
+      if(!confirm('Final confirmation: this cannot be undone. Delete this category?'))return;
+      const status=document.getElementById('pbClearStatus');status.textContent='Deleting…';
+      try{await adminApi({action:'admin-clear-data',category});status.textContent=`${label} deleted.`;await loadPublic();await loadAdmin();}
+      catch(e){status.textContent='Could not delete records: '+e.message;}
+    });
+  }
+
+  window.loadEplAdmin=async()=>{await loadPublic();await loadAdmin();installPbAdminTools();};
   $('createFixture').onclick=async()=>{try{await adminApi({action:'create-match',home_team_id:$('matchHome').value,away_team_id:$('matchAway').value,scheduled_at:$('matchDate').value?new Date($('matchDate').value).toISOString():null,match_note:$('matchNote').value});say('matchMsg','Fixture saved to the shared EPL database.');$('matchDate').value='';$('matchNote').value='';await loadPublic();await loadAdmin();}catch(e){say('matchMsg','⚠️ '+e.message);}};
   $('saveResult').onclick=async()=>{try{await adminApi({action:'save-result',match_id:$('resultMatch').value,home_score:$('homeScore').value,away_score:$('awayScore').value,evidence:$('evidence').value});say('resultMsg','Result saved. Public standings have updated.');$('homeScore').value='';$('awayScore').value='';$('evidence').value='';await loadPublic();await loadAdmin();}catch(e){say('resultMsg','⚠️ '+e.message);}};
   $('statMatch')?.addEventListener('change',renderStatPlayerOptions);
@@ -180,35 +253,11 @@
     if(!$('statMatch').value)throw new Error('Select a match first.');
     if(!$('statPlayer').value)throw new Error('Select a player from one of the teams in this match.');
     const body={action:'save-player-stats',match_id:$('statMatch').value,player_registration_id:$('statPlayer').value};
-    ['points','rebounds','assists','steals','blocks','turnovers','fouls','minutes'].forEach(k=>body[k]=$('stat_'+k).value);
+    ['points','rebounds','assists','steals','blocks','turnovers','fouls','minutes','fgs','three_ps','fts','plus_minus'].forEach(k=>body[k]=$('stat_'+k).value);
     await adminApi(body);say('statsMsg','Player stats saved for this game.');await loadPublic();
   }catch(e){say('statsMsg','⚠️ '+e.message);}};
-  $('manageTeam')?.addEventListener('change',()=>{
-    const t=state.teams.find(x=>x.id===$('manageTeam').value);if(!t)return;
-    $('editTeamName').value=t.team_name||'';$('editTeamCode').value=t.short_code||'';
-    $('editTeamRegion').value=t.region||'';$('editTeamCaptain').value=t.captain_name||'';
-    const preview=$('editTeamLogoPreview');
-    if(preview){preview.src=t.logo_url||'';preview.hidden=!t.logo_url;}
-    if($('editTeamLogo'))$('editTeamLogo').value='';
-  });
-  $('editTeamLogo')?.addEventListener('change',()=>{
-    const file=$('editTeamLogo').files?.[0],preview=$('editTeamLogoPreview');
-    if(!preview)return;
-    if(!file){const t=state.teams.find(x=>x.id===$('manageTeam').value);preview.src=t?.logo_url||'';preview.hidden=!t?.logo_url;return;}
-    if(!['image/png','image/jpeg','image/webp'].includes(file.type)||file.size>2*1024*1024){say('teamAdminMsg','Logo must be PNG, JPG or WEBP and under 2 MB.');$('editTeamLogo').value='';return;}
-    preview.src=URL.createObjectURL(file);preview.hidden=false;
-  });
-  $('saveTeamDetails')?.addEventListener('click',async()=>{
-    try{
-      const teamId=$('manageTeam').value;if(!teamId)throw new Error('Select a team first.');
-      const body={action:'admin-team-update',team_id:teamId,team_name:$('editTeamName').value.trim(),short_code:$('editTeamCode').value.trim(),region:$('editTeamRegion').value.trim(),captain_name:$('editTeamCaptain').value.trim()};
-      const logoFile=$('editTeamLogo')?.files?.[0];
-      if(logoFile){say('teamAdminMsg','Uploading logo…');body.logo_url=await uploadLogo(logoFile);}
-      await adminApi(body);say('teamAdminMsg','Team details and logo updated.');
-      if($('editTeamLogo'))$('editTeamLogo').value='';await loadPublic();await loadAdmin();
-      $('manageTeam').value=teamId;$('manageTeam').dispatchEvent(new Event('change'));
-    }catch(e){say('teamAdminMsg','⚠️ '+e.message);}
-  });
+  $('manageTeam')?.addEventListener('change',()=>{const t=state.teams.find(x=>x.id===$('manageTeam').value);if(!t)return;$('editTeamName').value=t.team_name||'';$('editTeamCode').value=t.short_code||'';$('editTeamRegion').value=t.region||'';$('editTeamCaptain').value=t.captain_name||'';});
+  $('saveTeamDetails')?.addEventListener('click',async()=>{try{await adminApi({action:'admin-team-update',team_id:$('manageTeam').value,team_name:$('editTeamName').value,short_code:$('editTeamCode').value,region:$('editTeamRegion').value,captain_name:$('editTeamCaptain').value});say('teamAdminMsg','Team details updated.');await loadPublic();await loadAdmin();}catch(e){say('teamAdminMsg','⚠️ '+e.message);}});
   $('publishNews')?.addEventListener('click',async()=>{try{await adminApi({action:'admin-publish-news',title:$('newsTitle').value,body:$('newsBody').value,category:$('newsCategory').value});$('newsTitle').value='';$('newsBody').value='';say('newsAdminMsg','Announcement published.');await loadPublic();}catch(e){say('newsAdminMsg','⚠️ '+e.message);}});
   $('applyMatchAdmin')?.addEventListener('click',async()=>{try{const v=$('matchAdminType').value;await adminApi({action:'admin-manage-match',match_id:$('manageMatch').value,status:['cancelled','upcoming'].includes(v)?v:'played',result_type:v,home_score:$('manageHomeScore').value,away_score:$('manageAwayScore').value,admin_note:$('manageMatchNote').value});say('matchAdminMsg','Match updated.');await loadPublic();await loadAdmin();}catch(e){say('matchAdminMsg','⚠️ '+e.message);}});
   $('disciplineSubjectType')?.addEventListener('change',()=>{const typ=$('disciplineSubjectType').value;[...$('disciplineSubject').options].forEach(o=>{if(o.value)o.hidden=o.dataset.type!==typ;});});
