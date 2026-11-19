@@ -321,6 +321,37 @@ th{background:#173b9b!important;color:#fff!important}th,td{border-bottom-color:#
 @media(max-width:650px){.pb-profile-hero .epl-avatar-wrap{width:100px!important;height:135px!important;min-width:100px!important;flex-basis:100px!important}.pb-profile-hero .epl-avatar,.pb-profile-avatar{width:100px!important;height:135px!important;max-width:100px!important;max-height:135px!important}.epl-avatar-wrap{flex-basis:40px!important;width:40px!important;height:52px!important;min-width:40px!important}.epl-avatar{width:40px!important;height:52px!important;max-width:40px!important;max-height:52px!important}}
 </style>
 
+
+<style id="pb-professional-player-cards">
+/* Clean, premium player cards — isolated from avatar sizing used elsewhere. */
+#playersTable,#freeAgentsList{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:13px;align-items:stretch}
+#playersTable .epl-player-row,#freeAgentsList .epl-player-row{
+  appearance:none;-webkit-appearance:none;display:flex;flex-direction:column;justify-content:space-between;gap:14px;
+  width:100%;min-width:0;min-height:166px;padding:16px 16px 12px!important;margin:0;
+  text-align:left;color:#182746!important;background:linear-gradient(145deg,#fff 0%,#f8faff 100%)!important;
+  border:1px solid #e1e8f2!important;border-radius:15px!important;box-shadow:0 5px 18px rgba(22,48,91,.055)!important;
+  cursor:pointer;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease;
+}
+#playersTable .epl-player-row:hover,#freeAgentsList .epl-player-row:hover{transform:translateY(-2px);border-color:#b8c9e5!important;box-shadow:0 12px 26px rgba(22,48,91,.11)!important;background:#fff!important}
+.pb-player-card-top{display:flex;align-items:center;gap:14px;min-width:0;width:100%}
+#playersTable .epl-avatar-wrap:has(.pb-card-avatar),#freeAgentsList .epl-avatar-wrap:has(.pb-card-avatar){display:flex!important;align-items:flex-end!important;justify-content:center!important;flex:0 0 76px!important;width:76px!important;height:94px!important;min-width:76px!important;overflow:visible!important;background:transparent!important;border:0!important;border-radius:0!important}
+#playersTable .epl-avatar-wrap:has(.pb-card-avatar) .pb-card-avatar,#freeAgentsList .epl-avatar-wrap:has(.pb-card-avatar) .pb-card-avatar{display:block!important;width:76px!important;height:94px!important;max-width:76px!important;max-height:94px!important;object-fit:contain!important;object-position:center bottom!important;border:0!important;border-radius:0!important;background:transparent!important}
+#playersTable .pb-card-avatar .epl-avatar-fallback,#freeAgentsList .pb-card-avatar .epl-avatar-fallback{width:54px;height:54px;font-size:17px!important}
+.epl-player-info{display:flex!important;flex:1;flex-direction:column;align-items:flex-start;gap:4px;min-width:0}
+.epl-player-info .pb-player-kicker{font-size:8px!important;font-weight:900!important;letter-spacing:.15em;color:#8794a9!important}
+.epl-player-info>b{display:block;max-width:100%;font-size:18px!important;line-height:1.12!important;font-weight:950!important;letter-spacing:-.035em!important;color:#172b50!important;overflow-wrap:anywhere}
+.epl-player-info .pb-player-username{font-size:11px!important;font-weight:650!important;color:#7a879b!important}
+.epl-player-info .pb-player-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:10px!important;font-weight:800!important;color:#435575!important}
+.pb-player-position{color:#244b9a}.pb-player-dot{color:#a2adbd}.pb-player-team{color:#64738b}
+.pb-player-open{display:inline-flex;align-items:center;gap:5px;white-space:nowrap;font-size:8px;font-weight:900;letter-spacing:.09em;color:#244b9a}
+.pb-player-open b{font-size:13px}
+.pb-player-card-footer{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;padding-top:10px;border-top:1px solid #e9eef5;width:100%}
+.pb-player-stat{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0}
+.pb-player-stat>b{font-size:15px;line-height:1;font-weight:950;color:#172e59;font-variant-numeric:tabular-nums}
+.pb-player-stat>small{font-size:8px;font-weight:900;letter-spacing:.1em;color:#8793a7}
+@media(max-width:520px){#playersTable,#freeAgentsList{grid-template-columns:1fr;gap:10px}#playersTable .epl-player-row,#freeAgentsList .epl-player-row{min-height:150px;padding:13px!important}.pb-player-card-top{gap:11px}#playersTable .pb-card-avatar.epl-avatar-wrap,#freeAgentsList .pb-card-avatar.epl-avatar-wrap,#playersTable .epl-avatar-wrap:has(.pb-card-avatar) .pb-card-avatar,#freeAgentsList .epl-avatar-wrap:has(.pb-card-avatar) .pb-card-avatar{width:68px!important;height:84px!important;max-width:68px!important;max-height:84px!important;flex-basis:68px!important;min-width:68px!important}.epl-player-info>b{font-size:17px!important}}
+</style>
+
 </head>
 <body>
 <header class="topbar"><div class="nav">
