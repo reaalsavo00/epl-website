@@ -22,41 +22,22 @@
   const team = id => state.teams.find(t=>t.id===id) || {team_name:'TBD',short_code:'—'};
   const matchName = m => `${team(m.home_team_id).team_name} vs ${team(m.away_team_id).team_name}`;
   const fmt = v => v ? new Date(v).toLocaleString(undefined,{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) : 'Date TBC';
-  // Roblox's public web APIs do not expose browser CORS headers. Use a GET-only
-  // CORS bridge for the public username search and thumbnail JSON; the image
-  // itself is then loaded directly from Roblox's CDN in the <img> element.
-  const ROBLOX_CORS_BRIDGE='https://proxy.cors.dev/';
-  async function robloxPublicGet(url){
-    const response=await fetch(ROBLOX_CORS_BRIDGE+url,{headers:{Accept:'application/json'},credentials:'omit'});
-    if(!response.ok)throw new Error(`Roblox lookup returned ${response.status}`);
-    return response.json();
-  }
+  // Resolve Roblox usernames through our own Supabase Edge Function.
+  // This avoids relying on a third-party browser CORS proxy.
   async function getAvatar(username){
     const name=String(username||'').trim();
     if(!name)return null;
     const cacheKey=name.toLowerCase();
     if(avatarCache.has(cacheKey))return avatarCache.get(cacheKey);
     try {
-      // Resolve the exact Roblox username first, then request the FULL avatar
-      // (not avatar-headshot) so the player's whole character is displayed.
-      const searchUrl='https://users.roblox.com/v1/users/search?'+new URLSearchParams({keyword:name,limit:'10'}).toString();
-      const userData=await robloxPublicGet(searchUrl);
-      const matchedUser=(userData.data||[]).find(user=>String(user.name||'').toLowerCase()===cacheKey);
-      const userId=matchedUser?.id;
-      if(!userId)return null;
-      const thumbUrl='https://thumbnails.roblox.com/v1/users/avatar?'+new URLSearchParams({userIds:String(userId),size:'420x420',format:'Png',isCircular:'false'}).toString();
-      let imageUrl='';
-      for(let attempt=0;attempt<3&&!imageUrl;attempt++){
-        const thumbData=await robloxPublicGet(thumbUrl);
-        const thumb=(thumbData.data||[]).find(item=>item.state==='Completed'&&item.imageUrl)||(thumbData.data||[]).find(item=>item.imageUrl);
-        imageUrl=thumb?.imageUrl||'';
-        if(!imageUrl&&attempt<2)await new Promise(resolve=>setTimeout(resolve,650));
-      }
-      const result={userId:String(userId),imageUrl};
+      const {data,error}=await sb.functions.invoke('roblox-avatar',{body:{username:name}});
+      if(error)throw error;
+      if(!data||!data.userId||!data.imageUrl)return null;
+      const result={userId:String(data.userId),imageUrl:String(data.imageUrl)};
       avatarCache.set(cacheKey,result);
       return result;
     } catch(error) {
-      console.warn('Roblox full avatar could not be loaded for',name,error);
+      console.warn('Roblox avatar lookup failed for',name,error);
       return null;
     }
   }
@@ -69,7 +50,7 @@
         p.roblox_user_id=avatar.userId;
         p.avatar_url=avatar.imageUrl;
       }
-      // Retry on the next refresh if Roblox or the CORS bridge is unavailable.
+      // Retry on a later refresh if the avatar service is temporarily unavailable.
       if(!p.avatar_url)p._avatarTried=false;
     }));
   }

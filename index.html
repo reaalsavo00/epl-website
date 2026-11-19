@@ -293,6 +293,34 @@ body{background:#f4f6fc;color:var(--pb-ink)}
 @media(max-width:760px){.brand-logo{width:39px!important;height:39px!important;max-width:39px!important;max-height:39px!important}.epl-team-logo{width:36px!important;height:36px!important;max-width:36px!important;max-height:36px!important;flex-basis:36px!important}}
 </style>
 
+<style id="pb-final-white-avatar-fix">
+/* Final Practical Basketball overrides: white theme, transparent artwork, readable avatars. */
+:root{--bg:#f5f7fc!important;--panel:#fff!important;--panel2:#edf2ff!important;--line:#dce3f0!important;--blue:#173b9b!important;--blue2:#2457d6!important;--gold:#d9ad32!important;--text:#111a2e!important;--muted:#68748b!important;--green:#16845b!important;--red:#bd3448!important;--shadow:0 12px 34px rgba(20,43,92,.08)!important;color-scheme:light}
+html,body{background:#f5f7fc!important;color:#111a2e!important}
+body:before{opacity:.28!important;background:radial-gradient(circle at 12% 0%,#e6edff 0,transparent 30%),radial-gradient(circle at 90% 15%,#fff5d8 0,transparent 25%)!important}
+.topbar{background:rgba(255,255,255,.97)!important;border:0!important;border-bottom:1px solid #dce3f0!important;box-shadow:0 5px 24px rgba(18,39,83,.07)!important}
+.navlinks button{color:#263653!important}.navlinks button.active,.navlinks button:hover{background:#173b9b!important;color:#fff!important;border-color:#173b9b!important;box-shadow:none!important}
+.adminbtn{background:#173b9b!important;color:#fff!important;border:1px solid #173b9b!important}
+.card,.stat,.pb-player-profile-panel,.pb-leaderboard{background:#fff!important;color:#111a2e!important;border-color:#dce3f0!important;box-shadow:0 8px 26px rgba(16,43,104,.08)!important}
+.sectionhead h2,.card h3,.stat strong,.team-card-heading h3,.epl-player-info>b,.team-profile-player-copy>b{color:#173b9b!important}
+.sectionhead p,.muted,.stat span,.field label,.tiny{color:#68748b!important}
+th{background:#173b9b!important;color:#fff!important}th,td{border-bottom-color:#e5eaf2!important}tbody tr:nth-child(even){background:#f7f9fd!important}tbody tr:hover{background:#fff9d8!important}
+.matchup{background:#f7f9fd!important;border-color:#e2e8f2!important}.match-side b,.score,.date,.rank{color:#173b9b!important}.score span{color:#d9ad32!important}
+.field input,.field select,.field textarea{background:#fff!important;color:#111a2e!important;border-color:#cbd5e1!important}.field input:focus,.field select:focus,.field textarea:focus{border-color:#2457d6!important;box-shadow:0 0 0 3px #2457d61a!important}
+.notice{border-color:#eee1a2!important;background:#fffbea!important;color:#665400!important}.success{color:#16845b!important}.empty{color:#68748b!important}.footer{background:#173b9b!important;color:#e8edff!important;border-top-color:#d9ad32!important}
+/* Images stay clean: no decorative tile, border, shadow or forced circular crop. */
+.epl-team-logo,.team-card-top .epl-team-logo,.team-profile-head .epl-team-logo,.match-side .epl-team-logo,.pb-profile-teamlogo{background:transparent!important;border:0!important;box-shadow:none!important;border-radius:0!important;padding:0!important;object-fit:contain!important}
+.epl-avatar-wrap{display:inline-flex!important;align-items:center!important;justify-content:center!important;flex:0 0 46px!important;width:46px!important;height:58px!important;min-width:46px!important;overflow:visible!important;background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important}
+.epl-avatar{display:block!important;width:46px!important;height:58px!important;max-width:46px!important;max-height:58px!important;object-fit:contain!important;object-position:center bottom!important;background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important}
+.epl-avatar-fallback{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background:#edf2ff;color:#173b9b;font-weight:900}
+.pb-profile-hero .epl-avatar-wrap{width:190px!important;height:210px!important;min-width:190px!important;flex:0 0 190px!important;overflow:visible!important;background:transparent!important;border:0!important;border-radius:0!important}
+.pb-profile-hero .epl-avatar,.pb-profile-avatar{width:190px!important;height:210px!important;max-width:190px!important;max-height:210px!important;object-fit:contain!important;object-position:center bottom!important;background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important}
+.pb-profile-hero{background:linear-gradient(110deg,#f5f7fc,#fff)!important}
+.pb-profile-tabs{background:#fff!important}.pb-profile-tabs button{color:#71809a!important}.pb-profile-tabs button.active{color:#173b9b!important;border-color:#d9ad32!important}
+.pb-profile-info,.pb-stat-tile{background:#fff!important;border-color:#e5eaf2!important}.pb-stat-tile strong,.pb-leader-row strong{color:#173b9b!important}.pb-player-click:hover{background:#f7f9fd!important}
+@media(max-width:650px){.pb-profile-hero .epl-avatar-wrap{width:100px!important;height:135px!important;min-width:100px!important;flex-basis:100px!important}.pb-profile-hero .epl-avatar,.pb-profile-avatar{width:100px!important;height:135px!important;max-width:100px!important;max-height:135px!important}.epl-avatar-wrap{flex-basis:40px!important;width:40px!important;height:52px!important;min-width:40px!important}.epl-avatar{width:40px!important;height:52px!important;max-width:40px!important;max-height:52px!important}}
+</style>
+
 </head>
 <body>
 <header class="topbar"><div class="nav">
