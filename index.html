@@ -71,6 +71,25 @@
 @media(max-width:900px){#page-home .home-lead{grid-template-columns:1fr}.home-lead-art{min-height:270px}.home-matchday-layout{grid-template-columns:1fr}.home-news-layout{grid-template-columns:1fr}.home-join-panel{min-height:200px}}
 @media(max-width:620px){#page-home .home-kicker{font-size:7px;gap:7px}.home-season-tag{font-size:7px}.home-lead-copy{padding:30px 22px}#page-home .home-lead h1{font-size:54px}.home-lead-art{min-height:235px}.court-graphic{inset:48px 20px 48px}.court-circle{width:95px;height:95px}.court-ball{width:55px;height:55px;font-size:25px}#page-home .home-metrics{grid-template-columns:repeat(2,1fr);padding:16px;margin-bottom:36px;gap:14px}.home-metric-label{grid-column:1/-1}.home-metric{padding-left:12px}.home-metric strong{font-size:25px}.home-metric-season{justify-items:start;padding-left:12px}.home-section-heading{align-items:flex-start!important;flex-direction:column}.home-outline-link{align-self:flex-start}.home-news-grid{grid-template-columns:1fr}.home-bottom-banner{align-items:flex-start;flex-direction:column;gap:9px}.home-bottom-banner strong{font-size:10px}}
 
+
+/* PRACTICAL BASKETBALL — transparent marks, player profiles, leaderboard and matchday polish */
+.epl-avatar-wrap{background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important;overflow:visible!important;}
+.epl-avatar{object-fit:contain!important;background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important;}
+.epl-avatar-fallback{background:#eef2f8!important;color:#183777!important;border:1px solid #dbe3f0!important;border-radius:50%!important}
+.epl-team-logo,.brand-logo,.teammark{background:transparent!important;box-shadow:none!important;}
+.epl-team-logo{object-fit:contain!important;padding:0!important;border:0!important;border-radius:0!important;}
+.team-card-top .epl-team-logo,.team-profile-head .epl-team-logo,.match-side .epl-team-logo{border:0!important;background:transparent!important;box-shadow:none!important;padding:0!important;border-radius:0!important;object-fit:contain!important}
+.match{padding:22px 0!important}.matchup{min-height:116px!important;padding:24px 22px!important;grid-template-columns:minmax(0,1fr) 150px minmax(0,1fr)!important;border-radius:14px!important;background:linear-gradient(110deg,#f7f9fd,#fff)!important}
+.match-side .epl-team-logo,.match-side .teammark{width:72px!important;height:72px!important;max-width:72px!important;max-height:72px!important;border:0!important;background:transparent!important;border-radius:0!important;object-fit:contain!important}
+.match-side b{font-size:17px!important}.score{font-size:34px!important}.match-centre .pill{font-size:10px!important;padding:7px 11px!important}
+.pb-player-profile{position:fixed;inset:0;z-index:1000;background:#08132699;display:flex;align-items:flex-start;justify-content:center;padding:4vh 16px;overflow:auto}
+.pb-player-profile[hidden]{display:none}.pb-player-profile-panel{width:min(1040px,100%);background:#fff;border-radius:18px;box-shadow:0 24px 80px #07142c55;overflow:hidden;color:#17233c}
+.pb-profile-hero{display:grid;grid-template-columns:210px 1fr;gap:28px;align-items:center;padding:32px;background:linear-gradient(110deg,#f5f7fc,#fff);border-bottom:1px solid #e6ebf3}
+.pb-profile-hero .epl-avatar-wrap{width:190px!important;height:210px!important;min-width:190px!important;flex:0 0 190px!important;border:0!important;background:transparent!important}.pb-profile-avatar{width:190px!important;height:210px!important;max-width:190px!important;max-height:210px!important;object-fit:contain!important;background:transparent!important}.pb-profile-teamlogo{width:38px;height:38px;object-fit:contain;vertical-align:middle;margin-right:9px;background:transparent!important}
+.pb-profile-name{font-size:clamp(32px,5vw,54px);font-weight:1000;letter-spacing:-.055em;margin:4px 0 10px;color:#142b68}.pb-profile-tabs{display:flex;gap:24px;padding:0 28px;border-bottom:1px solid #e5eaf2}.pb-profile-tabs button{border:0;background:none;padding:17px 4px;font-weight:900;color:#71809a;cursor:pointer;border-bottom:3px solid transparent}.pb-profile-tabs button.active{color:#173b9b;border-color:#e0b83d}.pb-profile-body{padding:26px 28px 34px}.pb-profile-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.pb-profile-info{padding:15px;border:1px solid #e7ecf4;border-radius:10px}.pb-profile-info small{display:block;color:#8290a7;font-size:9px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:7px}.pb-profile-info b{font-size:14px;color:#182b55}.pb-stat-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:18px 0}.pb-stat-tile{padding:17px;border:1px solid #e5eaf2;border-radius:10px;background:#fafbfd}.pb-stat-tile strong{display:block;font-size:28px;color:#173b9b}.pb-stat-tile span{font-size:9px;font-weight:900;letter-spacing:.12em;color:#75829a}.pb-recent-row{display:grid;grid-template-columns:1fr auto;gap:12px;padding:13px 0;border-bottom:1px solid #edf0f5;font-size:12px}.pb-profile-close{float:right;border:1px solid #dce3ef;background:white;border-radius:8px;padding:9px 13px;font-weight:900;cursor:pointer}
+.pb-leaderboard-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:18px}.pb-leaderboard{background:#fff;border:1px solid #e3e9f3;border-radius:13px;padding:18px;box-shadow:0 7px 22px #102b6808}.pb-leaderboard h3{color:#173b9b;margin:0 0 12px;font-size:15px}.pb-leader-row{display:grid;grid-template-columns:28px 34px minmax(0,1fr) auto;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #edf0f5}.pb-leader-row:last-child{border:0}.pb-leader-row img{width:32px;height:32px;object-fit:contain;background:transparent}.pb-leader-row b{font-size:12px}.pb-leader-row strong{font-size:14px;color:#173b9b}.pb-player-click{cursor:pointer}.pb-player-click:hover{background:#f7f9fd}
+@media(max-width:650px){.pb-profile-hero{grid-template-columns:100px 1fr;gap:14px;padding:20px}.pb-profile-avatar{width:100px;height:135px}.pb-profile-body{padding:18px}.pb-profile-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.pb-stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.pb-leaderboard-grid{grid-template-columns:1fr}.matchup{grid-template-columns:minmax(0,1fr) 75px minmax(0,1fr)!important;min-height:84px!important;padding:13px 8px!important;gap:4px!important}.match-side .epl-team-logo,.match-side .teammark{width:42px!important;height:42px!important}.match-side b{font-size:11px!important}.score{font-size:20px!important}.match-centre{min-width:0}.pb-player-profile{padding:10px}.pb-profile-name{font-size:30px}}
+
 </style>
 <style id="epl-royal-blue-rebrand">
 :root{--bg:#091747;--panel:#10235f;--panel2:#172f7b;--line:#304a9a;--blue:#17358f;--blue2:#3156c7;--gold:#ffe600;--text:#fff;--muted:#c0cbed;--green:#63e6ad}
@@ -274,68 +293,6 @@ body{background:#f4f6fc;color:var(--pb-ink)}
 @media(max-width:760px){.brand-logo{width:39px!important;height:39px!important;max-width:39px!important;max-height:39px!important}.epl-team-logo{width:36px!important;height:36px!important;max-width:36px!important;max-height:36px!important;flex-basis:36px!important}}
 </style>
 
-
-<style id="pb-player-card-revamp">
-/* Unified player presentation across Players, Free Agents, team squads and owner tools. */
-#playersTable,#freeAgentsList{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:14px;align-items:stretch}
-.epl-player-card{min-width:0;display:flex;flex-direction:column;gap:13px;padding:16px;border:1px solid #dfe6f2;border-radius:16px;background:linear-gradient(145deg,#fff 0%,#f7f9ff 100%);box-shadow:0 7px 22px rgba(16,43,134,.07);transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
-.epl-player-card:hover{transform:translateY(-2px);border-color:#b8c9ed;box-shadow:0 13px 28px rgba(16,43,134,.12)}
-.epl-player-card-main{display:flex;align-items:center;gap:14px;min-width:0}
-.epl-avatar-wrap{position:relative;display:block;overflow:hidden;flex:0 0 82px!important;width:82px!important;height:96px!important;min-width:82px!important;border-radius:13px!important;background:linear-gradient(145deg,#eaf0ff,#dce6fb)!important;border:1px solid #d6e0f2;box-shadow:inset 0 0 0 1px #fff}
-.epl-avatar.epl-player-portrait{display:block;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;object-fit:contain!important;object-position:center bottom!important;border-radius:0!important}
-.epl-avatar-fallback{position:absolute;inset:0;display:grid;place-items:center;background:linear-gradient(145deg,#183b99,#3970dc);color:#fff;font-size:22px!important;font-weight:950}
-.epl-player-info{display:flex;flex-direction:column;gap:6px;min-width:0;flex:1}
-.epl-player-name-line{display:flex;align-items:center;gap:7px;flex-wrap:wrap;min-width:0}
-.epl-player-info>b,.epl-player-name-line>b{font-size:17px!important;line-height:1.2!important;font-weight:950!important;color:#142b68!important;overflow-wrap:anywhere}
-.epl-player-handle{font-size:12px!important;color:#526582!important;font-weight:800!important;overflow-wrap:anywhere}
-.epl-player-info>small{font-size:10px!important;line-height:1.5;color:#77849b!important;font-weight:750!important;overflow-wrap:anywhere}
-.epl-player-tag{display:inline-flex;align-items:center;padding:4px 7px;border-radius:6px;background:#e8efff;color:#21489f;font-size:8px;font-weight:950;letter-spacing:.08em}
-.epl-player-tag.is-free-agent{background:#fff3cc;color:#86600a}
-.epl-player-stats{display:flex;flex-wrap:wrap;gap:7px;border-top:1px solid #e6ebf4;padding-top:11px}
-.epl-player-stats>span{display:inline-flex;align-items:baseline;gap:4px;padding:6px 8px;border-radius:7px;background:#edf2fc;color:#53627e;font-size:10px;font-weight:750}
-.epl-player-stats>span>b{color:#173b9b;font-size:13px;font-weight:950}
-.team-profile-player{display:flex!important;flex-direction:column;align-items:stretch!important;gap:10px!important;padding:14px!important;margin:9px 0;border:1px solid #e3e9f3!important;border-radius:13px;background:#fff}
-.team-profile-player-info{display:flex;align-items:center;gap:13px;min-width:0}
-.team-profile-player-info .epl-avatar-wrap{flex-basis:66px!important;width:66px!important;height:78px!important;min-width:66px!important}
-.team-profile-player-copy{display:flex;flex-direction:column;gap:5px;min-width:0}
-.team-profile-player-copy>b{font-size:15px!important;overflow-wrap:anywhere}
-.team-profile-player-copy .tiny{font-size:11px!important;line-height:1.5;overflow-wrap:anywhere}
-.team-profile-player-stats{display:flex;justify-content:flex-start!important;gap:7px!important;padding-top:9px;border-top:1px solid #edf0f6}
-.team-profile-player-stats .player-stat{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:43px;padding:6px;border-radius:8px;background:#f1f4fb}
-.team-profile-player-stats .player-stat b{font-size:14px!important}.team-profile-player-stats .player-stat small{font-size:8px!important;font-weight:900}
-.epl-owner-player-card{align-items:center;gap:12px!important;padding:12px!important;border:1px solid #e1e8f3!important;border-radius:12px;background:#fff;margin:8px 0}
-.epl-owner-person{min-width:0}.epl-owner-person .epl-avatar-wrap{width:58px!important;height:68px!important;min-width:58px!important;flex-basis:58px!important;border-radius:10px!important}
-.epl-owner-person>div:last-child{min-width:0}.epl-owner-person b{font-size:13px!important;color:#142b68}.epl-owner-person small{font-size:10px!important;overflow-wrap:anywhere}
-@media(max-width:620px){#playersTable,#freeAgentsList{grid-template-columns:1fr;gap:11px}.epl-player-card{padding:13px}.epl-avatar-wrap{flex-basis:72px!important;width:72px!important;height:86px!important;min-width:72px!important}.epl-player-info>b,.epl-player-name-line>b{font-size:15px!important}.team-profile-player-stats{flex-wrap:wrap}.epl-owner-player-card{flex-wrap:wrap;align-items:flex-start!important}.epl-owner-actions{width:100%;padding-left:70px;display:flex;flex-wrap:wrap;gap:6px}}
-</style>
-
-
-<style id="pb-white-theme-and-readable-stats-fix">
-/* Restore the league's white/light theme and guarantee readable standings/statistics. */
-:root{color-scheme:light!important;--pb-ink:#17233f;--pb-blue:#173b9b;--pb-gold:#e5b82e}
-html,body{background:#f4f7fc!important;color:#17233f!important}
-.topbar,.footer{background:#102a70!important;color:#fff!important}
-.page,.sectionhead,.sectionhead h2,.sectionhead p{color:#17233f!important}
-.card,.rules-panel,.epl-player-card,.team-profile-player{background:#fff!important;color:#17233f!important}
-.tablewrap{background:#fff!important;border:1px solid #dce4f1!important;border-radius:12px!important;overflow-x:auto}
-.tablewrap table,#standingsTable table,#homeStandings table{width:100%;border-collapse:collapse;background:#fff!important;color:#17233f!important}
-.tablewrap thead,#standingsTable thead,#homeStandings thead{background:#edf2ff!important;color:#173b9b!important}
-.tablewrap th,#standingsTable th,#homeStandings th{background:#edf2ff!important;color:#173b9b!important;font-weight:900!important}
-.tablewrap td,#standingsTable td,#homeStandings td{background:#fff!important;color:#263550!important;font-weight:650!important}
-.tablewrap tbody tr:nth-child(even) td,#standingsTable tbody tr:nth-child(even) td,#homeStandings tbody tr:nth-child(even) td{background:#f8faff!important}
-.tablewrap td b,#standingsTable td b,#homeStandings td b{color:#142b68!important}
-.tablewrap .rank,#standingsTable .rank{color:#a87800!important;font-weight:950!important}
-.epl-player-card,.epl-player-info,.epl-player-info b,.epl-player-handle,.epl-player-info small,.epl-player-stats,.epl-player-stats span{color:#263550!important}
-.epl-player-name-line>b,.epl-player-info>b,.team-profile-player-copy>b{color:#142b68!important}
-.epl-player-stats>span{background:#edf2fc!important;color:#53627e!important}
-.epl-player-stats>span>b{color:#173b9b!important}
-/* Full-body Roblox portraits use a portrait frame instead of a tiny circular crop. */
-.epl-avatar-wrap{display:block!important;overflow:hidden!important;border-radius:12px!important;background:#edf2ff!important}
-.epl-avatar.epl-player-portrait{width:100%!important;height:100%!important;object-fit:contain!important;object-position:center bottom!important}
-.epl-avatar-fallback{color:#fff!important}
-@media(max-width:620px){.tablewrap{max-width:100%}.tablewrap table{min-width:650px}}
-</style>
-
 </head>
 <body>
 <header class="topbar"><div class="nav">
@@ -377,7 +334,7 @@ html,body{background:#f4f7fc!important;color:#17233f!important}
 <section class="page" id="page-standings"><div class="sectionhead"><div><div class="eyebrow">Competition centre</div><h2>League standings</h2><p>Rankings update when admins enter final match scores.</p></div><span class="pill" id="tableSeason">SEASON 1</span></div><div class="card"><div class="tablewrap" id="standingsTable"></div></div></section>
 <section class="page" id="page-fixtures"><div class="sectionhead"><div><div class="eyebrow">Match centre</div><h2>Fixtures &amp; results</h2><p>Every matchup, from opening night to the final.</p></div><select class="btn" id="fixtureFilter"><option value="all">All matches</option><option value="upcoming">Upcoming</option><option value="played">Completed</option></select></div><div class="card" id="fixtureList"></div></section>
 <section class="page" id="page-teams"><div class="sectionhead"><div><div class="eyebrow">Franchises</div><h2>Teams</h2><p>Meet the clubs competing for the EPL crown.</p></div></div><div class="grid3" id="teamsGrid"></div><div class="card hidden" id="teamProfile" style="margin-top:18px"></div></section>
-<section class="page" id="page-players"><div class="sectionhead"><div><div class="eyebrow">Player hub</div><h2>Players &amp; statistics</h2><p>Profiles, roles and season leaders.</p></div></div><div class="grid2"><div class="card"><h3>Registered players</h3><div class="field" style="margin-bottom:12px"><input id="playerSearch" placeholder="Search display name or Roblox username..."/></div><div id="playersTable"></div></div><div class="card"><h3>League leaders</h3><div id="leaders"></div><p class="tiny">Stats are entered by league admins; no Roblox stats are automatically imported.</p></div></div></section>
+<section class="page" id="page-players"><div class="sectionhead"><div><div class="eyebrow">Player hub</div><h2>Players &amp; statistics</h2><p>Profiles, roles and season leaders.</p></div></div><div class="grid2"><div class="card"><h3>Registered players</h3><div class="field" style="margin-bottom:12px"><input id="playerSearch" placeholder="Search display name or Roblox username..."/></div><div id="playersTable"></div></div><div class="card"><h3>League leaders</h3><div id="leaders"></div><p class="tiny">Stats are entered by league admins; no Roblox stats are automatically imported.</p></div></div><div class="pb-leaderboard-grid" id="pbLeaderboards"></div></section>
 <section class="page" id="page-freeagents"><div class="sectionhead"><div><div class="eyebrow">Player marketplace</div><h2>Free Agents</h2><p>Discover approved free agents looking for a team.</p></div></div><div class="card" style="margin-bottom:16px"><h3>Register as a Free Agent</h3><p class="muted">Create your official EPL free-agent listing. Your profile appears after staff approval.</p><form id="freeAgentRegistrationForm"><div class="formgrid"><div class="field"><label for="freeAgentDisplayName">Display name *</label><input id="freeAgentDisplayName" maxlength="60" name="display_name" placeholder="Your display name" required=""/></div><div class="field"><label for="freeAgentRoblox">Roblox username *</label><input id="freeAgentRoblox" maxlength="40" name="roblox_username" placeholder="Your Roblox username" required=""/></div></div><div class="formactions"><button class="btn primary" type="submit">Register as Free Agent</button></div><div aria-live="polite" class="success" id="freeAgentRegistrationMsg" role="status"></div></form></div><div class="sectionhead"><div><h2>Registered Free Agents</h2><p>Search approved agents by display name or Roblox username.</p></div></div><div class="card"><div class="field" style="margin-bottom:12px"><input id="agentSearch" placeholder="Search free agents..."/></div><div id="freeAgentsList"></div></div></section>
 <section class="page" id="page-news"><div class="sectionhead"><div><div class="eyebrow">Press room</div><h2>League news</h2><p>Official announcements and matchday updates.</p></div></div><div class="grid2"><div class="card" id="newsList"></div><div class="card"><h3>Official updates</h3><p class="muted">League announcements are published by authorised EPL admins and appear here automatically.</p><div class="notice">Check back for fixtures, roster updates and official league announcements.</div></div></div></section>
 <section class="page" id="page-register"><div class="sectionhead"><div><div class="eyebrow">Join the league</div><h2>EPL registration</h2><p>Submit a team or player registration. League staff will review it before it appears publicly.</p></div><span class="pill">STAFF REVIEW REQUIRED</span></div>

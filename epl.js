@@ -22,24 +22,43 @@
   const team = id => state.teams.find(t=>t.id===id) || {team_name:'TBD',short_code:'—'};
   const matchName = m => `${team(m.home_team_id).team_name} vs ${team(m.away_team_id).team_name}`;
   const fmt = v => v ? new Date(v).toLocaleString(undefined,{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) : 'Date TBC';
-  // Resolve Roblox identity through a Supabase Edge Function. This avoids browser CORS failures
-  // from Roblox's user and thumbnail APIs and uses the exact username match.
+  // Roblox's public web APIs do not expose browser CORS headers. Use a GET-only
+  // CORS bridge for the public username search and thumbnail JSON; the image
+  // itself is then loaded directly from Roblox's CDN in the <img> element.
+  const ROBLOX_CORS_BRIDGE='https://proxy.cors.dev/';
+  async function robloxPublicGet(url){
+    const response=await fetch(ROBLOX_CORS_BRIDGE+url,{headers:{Accept:'application/json'},credentials:'omit'});
+    if(!response.ok)throw new Error(`Roblox lookup returned ${response.status}`);
+    return response.json();
+  }
   async function getAvatar(username){
-    const name=String(username||'').trim().replace(/^@/,'');
+    const name=String(username||'').trim();
     if(!name)return null;
     const cacheKey=name.toLowerCase();
     if(avatarCache.has(cacheKey))return avatarCache.get(cacheKey);
-    try{
-      const response=await fetch(URL+'/functions/v1/roblox-avatar',{
-        method:'POST',headers:{'Content-Type':'application/json',apikey:KEY,Authorization:'Bearer '+KEY},
-        body:JSON.stringify({username:name})
-      });
-      const data=await response.json().catch(()=>({}));
-      if(!response.ok||!data.userId||!data.imageUrl)throw new Error(data.error||'Avatar lookup unavailable');
-      const result={userId:String(data.userId),imageUrl:String(data.imageUrl)};
+    try {
+      // Resolve the exact Roblox username first, then request the FULL avatar
+      // (not avatar-headshot) so the player's whole character is displayed.
+      const searchUrl='https://users.roblox.com/v1/users/search?'+new URLSearchParams({keyword:name,limit:'10'}).toString();
+      const userData=await robloxPublicGet(searchUrl);
+      const matchedUser=(userData.data||[]).find(user=>String(user.name||'').toLowerCase()===cacheKey);
+      const userId=matchedUser?.id;
+      if(!userId)return null;
+      const thumbUrl='https://thumbnails.roblox.com/v1/users/avatar?'+new URLSearchParams({userIds:String(userId),size:'420x420',format:'Png',isCircular:'false'}).toString();
+      let imageUrl='';
+      for(let attempt=0;attempt<3&&!imageUrl;attempt++){
+        const thumbData=await robloxPublicGet(thumbUrl);
+        const thumb=(thumbData.data||[]).find(item=>item.state==='Completed'&&item.imageUrl)||(thumbData.data||[]).find(item=>item.imageUrl);
+        imageUrl=thumb?.imageUrl||'';
+        if(!imageUrl&&attempt<2)await new Promise(resolve=>setTimeout(resolve,650));
+      }
+      const result={userId:String(userId),imageUrl};
       avatarCache.set(cacheKey,result);
       return result;
-    }catch(error){console.warn('Roblox avatar lookup failed for',name,error);return null;}
+    } catch(error) {
+      console.warn('Roblox full avatar could not be loaded for',name,error);
+      return null;
+    }
   }
   async function hydratePeople(people){
     const unique=[...new Set((people||[]).filter(p=>p&&p.roblox_username&&!p._avatarTried))];
@@ -62,9 +81,9 @@
   function playerAvatar(p,extraClass=''){
     const label=String(p.display_name||p.roblox_username||'').trim();
     const initials=(label.split(/\s+/).map(x=>x[0]).join('').slice(0,2)||'RB').toUpperCase();
-    const cls=('epl-avatar epl-player-portrait '+extraClass).trim();
+    const cls=('epl-avatar '+extraClass).trim();
     const fallback=`<span class="epl-avatar-fallback"${p.avatar_url?' hidden':''}>${esc(initials)}</span>`;
-    return `<span class="epl-avatar-wrap" data-roblox-user-id="${esc(p.roblox_user_id||'')}"><img class="${cls}" src="${esc(p.avatar_url||'')}" alt="${esc(p.roblox_username||'Roblox')} full avatar" loading="lazy" ${p.avatar_url?'':'hidden'} onerror="this.hidden=true;this.nextElementSibling.hidden=false">${fallback}</span>`;
+    return `<span class="epl-avatar-wrap"><img class="${cls}" src="${esc(p.avatar_url||'') }" alt="${esc(p.roblox_username||'Roblox')} avatar" ${p.avatar_url?'':'hidden'} onerror="this.hidden=true;this.nextElementSibling.hidden=false">${fallback}</span>`;
   }
   function teamMark(t){return t.logo_url?`<img class="epl-team-logo" src="${esc(t.logo_url)}" alt="">`:`<span class="teammark">${esc(t.short_code||'EPL')}</span>`;}
   function standings(){return state.teams.map(t=>{let ms=state.matches.filter(m=>m.status==='played'&&(m.home_team_id===t.id||m.away_team_id===t.id));let w=0,l=0,pf=0,pa=0;ms.forEach(m=>{let h=m.home_team_id===t.id,f=h?m.home_score:m.away_score,a=h?m.away_score:m.home_score;pf+=f||0;pa+=a||0;if(f>a)w++;else if(f<a)l++;});return {...t,played:ms.length,w,l,pf,pa,diff:pf-pa,pts:w*2};}).sort((a,b)=>b.pts-a.pts||b.diff-a.diff||b.pf-a.pf);}
@@ -93,16 +112,19 @@
     const newsHtml=(state.news||[]).map(n=>`<article class="newsitem"><span class="pill">${esc(n.category||'Announcement')}</span><h4>${esc(n.title)}</h4><p>${esc(n.body)}</p><small class="tiny">${esc(fmt(n.created_at))}</small></article>`).join('')||'<div class="empty">No announcements yet.</div>'; if($('newsList'))$('newsList').innerHTML=newsHtml;if($('homeNews'))$('homeNews').innerHTML=(state.news||[]).slice(0,3).map(n=>`<div class="card"><span class="pill">${esc(n.category||'News')}</span><h3 style="margin-top:12px">${esc(n.title)}</h3><p class="muted">${esc(n.body.slice(0,180))}</p></div>`).join('')||'<div class="card empty">League announcements will appear here.</div>';
     const teamSelect=$('regPlayerTeam'); if(teamSelect){const current=teamSelect.value;teamSelect.innerHTML='<option value="">Free Agent / no team</option>'+state.teams.map(t=>`<option value="${t.id}">${esc(t.team_name)}</option>`).join('');teamSelect.value=current;}
   }
-  function playerCard(p,isAgent=false){const teamName=isAgent?'Free Agent':(p.team_name||'Free Agent');const role=isAgent?'FREE AGENT':(p.roster_role||'PLAYER').replaceAll('_',' ').toUpperCase();return `<article class="epl-player-card"><div class="epl-player-card-main">${playerAvatar(p,'epl-player-portrait')}<div class="epl-player-info"><div class="epl-player-name-line"><b>${esc(p.display_name||p.roblox_username)}</b><span class="epl-player-tag ${isAgent?'is-free-agent':''}">${esc(role)}</span></div><span class="epl-player-handle">@${esc(p.roblox_username||'Roblox user')}</span><small>${esc(teamName)} · ${esc(p.position||'Player')}${p.roblox_user_id?' · ID '+esc(p.roblox_user_id):''}</small></div></div><div class="epl-player-stats">${statSummary(p.id)}</div></article>`;}
-  function statSummary(id){const rows=state.stats.filter(s=>s.player_registration_id===id);if(!rows.length)return '<span class="tiny">No stats recorded yet</span>';const sum=k=>rows.reduce((n,r)=>n+(Number(r[k])||0),0);return `<span><b>${sum('points')}</b> PTS</span><span><b>${sum('rebounds')}</b> REB</span><span><b>${sum('assists')}</b> AST</span><span><b>${sum('steals')}</b> STL</span><span><b>${sum('blocks')}</b> BLK</span><span><b>${sum('turnovers')}</b> TO</span><span><b>${sum('fouls')}</b> PF</span><span><b>${sum('minutes')}</b> MIN</span>`;}
-  function renderPlayers(){const q=($('playerSearch')?.value||'').toLowerCase();const list=state.players.filter(p=>(p.display_name+' '+p.roblox_username+' '+(p.team_name||'')).toLowerCase().includes(q));$('playersTable').innerHTML=list.map(p=>playerCard(p,false)).join('')||'<div class="empty">No players match that search.</div>';}
+  function playerCard(p,isAgent=false){const teamName=isAgent?'Free Agent':(p.team_name||team(p.team_id).team_name||'Free Agent');return `<button type="button" class="epl-player-row pb-player-click" data-player-profile="${esc(p.id)}" data-player-kind="${isAgent?'agent':'player'}">${playerAvatar(p)}<div class="epl-player-info"><b>${esc(p.display_name)}</b><span>@${esc(p.roblox_username)} · ${esc(teamName)}</span><small>${esc(p.position||'Player')} · VIEW PROFILE ↗</small></div><div class="epl-player-stats">${statSummary(p.id)}</div></button>`;}
+  function statSummary(id){const rows=state.stats.filter(s=>s.player_registration_id===id);if(!rows.length)return '<span class="tiny">No stats recorded yet</span>';const sum=k=>rows.reduce((n,r)=>n+(Number(r[k])||0),0);return `<span><b>${sum('points')}</b> PTS</span><span><b>${sum('rebounds')}</b> REB</span><span><b>${sum('assists')}</b> AST</span><span><b>${sum('steals')}</b> STL</span><span><b>${sum('blocks')}</b> BLK</span>`;}
+  function ensurePlayerModal(){if($('pbPlayerModal'))return;const modal=document.createElement('div');modal.id='pbPlayerModal';modal.className='pb-player-profile';modal.hidden=true;modal.innerHTML='<div class="pb-player-profile-panel" role="dialog" aria-modal="true" aria-label="Player profile"><div id="pbPlayerProfileContent"></div></div>';document.body.appendChild(modal);modal.addEventListener('click',e=>{if(e.target===modal)modal.hidden=true;});}
+  function openPlayerProfile(playerId,kind='player'){const p=(kind==='agent'?state.freeAgents:state.players).find(x=>String(x.id)===String(playerId))||state.players.find(x=>String(x.id)===String(playerId))||state.freeAgents.find(x=>String(x.id)===String(playerId));if(!p)return;ensurePlayerModal();const modal=$('pbPlayerModal'),content=$('pbPlayerProfileContent');const t=state.teams.find(x=>String(x.id)===String(p.team_id));const rows=state.stats.filter(x=>String(x.player_registration_id)===String(p.id));const sum=k=>rows.reduce((n,x)=>n+(Number(x[k])||0),0);const avg=k=>rows.length?(sum(k)/rows.length).toFixed(1):'0.0';const games=rows.map(x=>({...x,match:state.matches.find(m=>String(m.id)===String(x.match_id))})).filter(x=>x.match).sort((a,b)=>String(b.match.scheduled_at||'').localeCompare(String(a.match.scheduled_at||'')));const recent=games.slice(0,5);const recentHtml=recent.map(x=>{const m=x.match,home=team(m.home_team_id),away=team(m.away_team_id);return `<div class="pb-recent-row"><span>${esc(fmt(m.scheduled_at))}<br><b>${esc(home.team_name)} vs ${esc(away.team_name)}</b></span><strong>${Number(x.points)||0} PTS · ${Number(x.rebounds)||0} REB · ${Number(x.assists)||0} AST</strong></div>`;}).join('')||'<p class="muted">No recent match statistics have been recorded for this player.</p>';const statKeys=[['PTS','points'],['REB','rebounds'],['AST','assists'],['STL','steals'],['BLK','blocks'],['3PM','three_ps'],['FGS','fgs'],['FTS','fts'],['TOV','turnovers'],['FLS','fouls'],['+/-','plus_minus'],['MIN','minutes']];content.innerHTML=`<div class="pb-profile-hero"><div>${playerAvatar(p,'pb-profile-avatar')}</div><div><button class="pb-profile-close" id="pbClosePlayer">CLOSE ✕</button><div class="eyebrow">PRACTICAL BASKETBALL · PLAYER PROFILE</div><h1 class="pb-profile-name">${esc(p.display_name||p.roblox_username)}</h1><p class="muted">@${esc(p.roblox_username)} · ${esc(p.position||'Position not set')}</p><p>${t?`${teamMark(t)} <b>${esc(t.team_name)}</b>`:'<span class="pill">FREE AGENT · NO TEAM</span>'}</p><small class="muted">${rows.length} recorded games · Roblox ID ${esc(p.roblox_user_id||'lookup pending')}</small></div></div><div class="pb-profile-tabs"><button class="active" data-profile-tab="overview">OVERVIEW</button><button data-profile-tab="stats">STATS</button></div><div class="pb-profile-body" id="pbPlayerTabBody"><h3>PLAYER INFORMATION</h3><div class="pb-profile-grid"><div class="pb-profile-info"><small>PLAYER</small><b>${esc(p.display_name)}</b></div><div class="pb-profile-info"><small>POSITION</small><b>${esc(p.position||'Not set')}</b></div><div class="pb-profile-info"><small>TEAM</small><b>${esc(t?.team_name||'Free Agent')}</b></div></div><h3 style="margin-top:26px">SEASON AVERAGES</h3><div class="pb-stat-grid">${[['PPG',avg('points')],['RPG',avg('rebounds')],['APG',avg('assists')],['SPG',avg('steals')],['BPG',avg('blocks')],['3PM',sum('three_ps')],['FGS',sum('fgs')],['GAMES',rows.length]].map(([a,b])=>`<div class="pb-stat-tile"><strong>${b}</strong><span>${a}</span></div>`).join('')}</div><h3>RECENT MATCHES</h3>${recentHtml}</div>`;modal.hidden=false;$('pbClosePlayer').onclick=()=>modal.hidden=true;content.querySelectorAll('[data-profile-tab]').forEach(btn=>btn.onclick=()=>{content.querySelectorAll('[data-profile-tab]').forEach(x=>x.classList.toggle('active',x===btn));const body=$('pbPlayerTabBody');if(btn.dataset.profileTab==='overview'){body.innerHTML=`<h3>PLAYER INFORMATION</h3><div class="pb-profile-grid"><div class="pb-profile-info"><small>PLAYER</small><b>${esc(p.display_name)}</b></div><div class="pb-profile-info"><small>POSITION</small><b>${esc(p.position||'Not set')}</b></div><div class="pb-profile-info"><small>TEAM</small><b>${esc(t?.team_name||'Free Agent')}</b></div></div><h3 style="margin-top:26px">RECENT MATCHES</h3>${recentHtml}`;}else{body.innerHTML=`<h3>CAREER STATISTICS</h3><div class="pb-stat-grid">${statKeys.map(([label,key])=>`<div class="pb-stat-tile"><strong>${sum(key)}</strong><span>${label}</span></div>`).join('')}</div><h3>GAME LOG · LAST FIVE</h3>${recentHtml}`;}});}
+  function renderLeaderboards(){const root=$('pbLeaderboards');if(!root)return;const categories=[['3-POINT LEADER','three_ps','3PM'],['TOP SCORER','points','PTS'],['BEST REBOUNDER','rebounds','REB'],['PLAYMAKER','assists','AST'],['BEST DEFENDER',null,'DEF'],['STEALS LEADER','steals','STL'],['BLOCKS LEADER','blocks','BLK'],['ALL-ROUND PLAYER',null,'EFF']];root.innerHTML=categories.map(([title,key,label])=>{const rows=state.players.map(p=>{const ps=state.stats.filter(s=>String(s.player_registration_id)===String(p.id));const value=key?ps.reduce((n,s)=>n+(Number(s[key])||0),0):ps.reduce((n,s)=>n+(title==='BEST DEFENDER'?(Number(s.steals)||0)+(Number(s.blocks)||0):(Number(s.points)||0)+(Number(s.rebounds)||0)+(Number(s.assists)||0)+(Number(s.steals)||0)+(Number(s.blocks)||0)),0);return {p,value};}).filter(x=>x.value>0).sort((a,b)=>b.value-a.value).slice(0,5);return `<div class="pb-leaderboard"><h3>${title} · TOP 5</h3>${rows.length?rows.map((x,i)=>`<div class="pb-leader-row"><b>#${i+1}</b>${playerAvatar(x.p)}<span><b>${esc(x.p.display_name)}</b><br><small class="muted">${esc(team(x.p.team_id).team_name||'Free Agent')}</small></span><strong>${x.value} ${label}</strong></div>`).join(''):'<p class="tiny">No recorded stats yet.</p>'}</div>`;}).join('');}
+  function renderPlayers(){const q=($('playerSearch')?.value||'').toLowerCase();const list=state.players.filter(p=>(p.display_name+' '+p.roblox_username+' '+(p.team_name||'')).toLowerCase().includes(q));$('playersTable').innerHTML=list.map(p=>playerCard(p,false)).join('')||'<div class="empty">No players match that search.</div>';renderLeaderboards();}
   function renderAgents(){const q=($('agentSearch')?.value||'').toLowerCase();const list=state.freeAgents.filter(p=>(p.display_name+' '+p.roblox_username).toLowerCase().includes(q));$('freeAgentsList').innerHTML=list.map(p=>playerCard(p,true)).join('')||'<div class="empty">No approved free agents yet.</div>';}
   async function loadPublic(){try{const d=await publicApi();Object.assign(state,d);renderPublic();hydrateAvatars();}catch(e){console.error(e);}}
   function setPage(p){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));$('page-'+p)?.classList.add('active');document.querySelectorAll('[data-page]').forEach(x=>x.classList.toggle('active',x.dataset.page===p));window.scrollTo({top:0,behavior:'smooth'});}
   window.eplPage=setPage;
   document.querySelectorAll('[data-page]').forEach(b=>b.addEventListener('click',()=>setPage(b.dataset.page)));
   document.querySelectorAll('[data-goto]').forEach(b=>b.addEventListener('click',()=>setPage(b.dataset.goto)));
-  document.addEventListener('click',e=>{const b=e.target.closest('[data-team-profile]');if(b)renderTeamProfile(b.dataset.teamProfile);});
+  document.addEventListener('click',e=>{const p=e.target.closest('[data-player-profile]');if(p){openPlayerProfile(p.dataset.playerProfile,p.dataset.playerKind||'player');return;}const b=e.target.closest('[data-team-profile]');if(b)renderTeamProfile(b.dataset.teamProfile);});
   $('adminNav').onclick=()=>window.openEplAdmin?.(); $('fixtureFilter').onchange=renderPublic;
   $('playerSearch').addEventListener('input',renderPlayers); $('agentSearch').addEventListener('input',renderAgents);
   async function uploadLogo(file){if(!file)return null;if(!['image/png','image/jpeg','image/webp'].includes(file.type)||file.size>2*1024*1024)throw new Error('Logo must be PNG, JPG or WEBP and under 2 MB.');const ext=file.type==='image/png'?'png':file.type==='image/webp'?'webp':'jpg';const path=`team-logos/${crypto.randomUUID()}.${ext}`;const {error}=await sb.storage.from('epl-team-logos').upload(path,file,{contentType:file.type,upsert:false});if(error)throw error;return sb.storage.from('epl-team-logos').getPublicUrl(path).data.publicUrl;}
@@ -253,7 +275,7 @@
     const teamId=approved[0].id,roster=state.ownerRoster.filter(p=>p.team_id===teamId);
     const starters=roster.filter(p=>p.roster_role==='starter').length,subs=roster.length-starters;
     $('ownerRoster').innerHTML=`<h3 style="margin-top:18px">${esc(approved[0].team_name)} · Squad (${roster.length}/15)</h3><p class="tiny">${starters}/5 starters · ${subs}/10 substitutes</p>`+
-      roster.map(p=>`<div class="epl-owner-row epl-owner-player-card"><div class="epl-owner-person">${playerAvatar(p,'owner-avatar')}<div><b>${esc(p.display_name)}</b><small>@${esc(p.roblox_username)} · ${esc(p.roster_role||'starter')}${p.roblox_user_id?' · ID '+esc(p.roblox_user_id):''}</small></div></div><div class="epl-owner-actions"><button class="btn" data-role="${p.id}" data-team="${teamId}" data-next="${p.roster_role==='starter'?'substitute':'starter'}">Make ${p.roster_role==='starter'?'sub':'starting'} player</button><button class="btn" data-remove="${p.id}" data-team="${teamId}">Remove</button></div></div>`).join('')+
+      roster.map(p=>`<div class="epl-owner-row"><div class="epl-owner-person">${playerAvatar(p,'owner-avatar')}<div><b>${esc(p.display_name)}</b><small>@${esc(p.roblox_username)} · ${esc(p.roster_role||'starter')}</small></div></div><div class="epl-owner-actions"><button class="btn" data-role="${p.id}" data-team="${teamId}" data-next="${p.roster_role==='starter'?'substitute':'starter'}">Make ${p.roster_role==='starter'?'sub':'starting'} player</button><button class="btn" data-remove="${p.id}" data-team="${teamId}">Remove</button></div></div>`).join('')+
       `<div class="formgrid" style="margin-top:14px"><div class="field"><label>Add approved player</label><select id="ownerAddPlayer"><option value="">Select player</option>${state.availablePlayers.map(p=>`<option value="${p.id}">${esc(p.display_name)} (@${esc(p.roblox_username)})</option>`).join('')}</select></div><div class="field"><label>Squad role</label><select id="ownerAddRole"><option value="starter">Starter</option><option value="substitute">Substitute</option></select></div></div><button class="btn primary" id="ownerAddBtn" data-team="${teamId}">Add player to squad</button><p id="ownerMsg" class="tiny"></p>`;
     document.querySelectorAll('[data-remove]').forEach(b=>b.onclick=async()=>{if(!confirm('Remove this player from your squad?'))return;try{await ownerApi({action:'owner-remove-player',team_id:b.dataset.team,player_id:b.dataset.remove});await refreshOwner();await loadPublic();}catch(e){say('ownerMsg','⚠️ '+e.message);}});
     document.querySelectorAll('[data-role]').forEach(b=>b.onclick=async()=>{try{await ownerApi({action:'owner-set-role',team_id:b.dataset.team,player_id:b.dataset.role,roster_role:b.dataset.next});await refreshOwner();}catch(e){say('ownerMsg','⚠️ '+e.message);}});
