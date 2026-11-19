@@ -22,56 +22,25 @@
   const team = id => state.teams.find(t=>t.id===id) || {team_name:'TBD',short_code:'—'};
   const matchName = m => `${team(m.home_team_id).team_name} vs ${team(m.away_team_id).team_name}`;
   const fmt = v => v ? new Date(v).toLocaleString(undefined,{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) : 'Date TBC';
-  // Roblox's public web APIs do not expose browser CORS headers. Use a GET-only
-  // CORS bridge for the public username search and thumbnail JSON; the image
-  // itself is then loaded directly from Roblox's CDN in the <img> element.
+  // Avatar requests use the Roblox user ID already stored in Supabase.
+  // No username search is performed by visitors' browsers.
   const ROBLOX_CORS_BRIDGE='https://proxy.cors.dev/';
-  async function robloxPublicGet(url){
-    const response=await fetch(ROBLOX_CORS_BRIDGE+url,{headers:{Accept:'application/json'},credentials:'omit'});
-    if(!response.ok)throw new Error(`Roblox lookup returned ${response.status}`);
-    return response.json();
-  }
-  async function getAvatar(username){
-    const name=String(username||'').trim();
-    if(!name)return null;
-    const cacheKey=name.toLowerCase();
-    if(avatarCache.has(cacheKey))return avatarCache.get(cacheKey);
-    try {
-      // Resolve the exact Roblox username first, then request the FULL avatar
-      // (not avatar-headshot) so the player's whole character is displayed.
-      const searchUrl='https://users.roblox.com/v1/users/search?'+new URLSearchParams({keyword:name,limit:'10'}).toString();
-      const userData=await robloxPublicGet(searchUrl);
-      const matchedUser=(userData.data||[]).find(user=>String(user.name||'').toLowerCase()===cacheKey);
-      const userId=matchedUser?.id;
-      if(!userId)return null;
-      const thumbUrl='https://thumbnails.roblox.com/v1/users/avatar?'+new URLSearchParams({userIds:String(userId),size:'420x420',format:'Png',isCircular:'false'}).toString();
-      let imageUrl='';
-      for(let attempt=0;attempt<3&&!imageUrl;attempt++){
-        const thumbData=await robloxPublicGet(thumbUrl);
-        const thumb=(thumbData.data||[]).find(item=>item.state==='Completed'&&item.imageUrl)||(thumbData.data||[]).find(item=>item.imageUrl);
-        imageUrl=thumb?.imageUrl||'';
-        if(!imageUrl&&attempt<2)await new Promise(resolve=>setTimeout(resolve,650));
-      }
-      const result={userId:String(userId),imageUrl};
-      avatarCache.set(cacheKey,result);
-      return result;
-    } catch(error) {
-      console.warn('Roblox full avatar could not be loaded for',name,error);
-      return null;
-    }
+  async function getAvatarById(userId){
+    const id=String(userId||'').trim();if(!/^\d+$/.test(id))return null;
+    if(avatarCache.has(id))return avatarCache.get(id);
+    try{
+      const url='https://thumbnails.roblox.com/v1/users/avatar?'+new URLSearchParams({userIds:id,size:'420x420',format:'Png',isCircular:'false'}).toString();
+      const response=await fetch(ROBLOX_CORS_BRIDGE+url,{headers:{Accept:'application/json'},credentials:'omit'});
+      if(!response.ok)throw new Error(`Roblox thumbnail returned ${response.status}`);
+      const data=await response.json();
+      const thumb=(data.data||[]).find(x=>x.state==='Completed'&&x.imageUrl)||(data.data||[]).find(x=>x.imageUrl);
+      const result=thumb?.imageUrl?{userId:id,imageUrl:thumb.imageUrl}:null;
+      if(result)avatarCache.set(id,result);return result;
+    }catch(error){console.warn('Roblox avatar could not be loaded for saved user ID',id,error);return null;}
   }
   async function hydratePeople(people){
-    const unique=[...new Set((people||[]).filter(p=>p&&p.roblox_username&&!p._avatarTried))];
-    await Promise.all(unique.map(async p=>{
-      p._avatarTried=true;
-      const avatar=await getAvatar(p.roblox_username);
-      if(avatar){
-        p.roblox_user_id=avatar.userId;
-        p.avatar_url=avatar.imageUrl;
-      }
-      // Retry on the next refresh if Roblox or the CORS bridge is unavailable.
-      if(!p.avatar_url)p._avatarTried=false;
-    }));
+    const unique=[...new Set((people||[]).filter(p=>p&&p.roblox_user_id&&!p._avatarTried))];
+    await Promise.all(unique.map(async p=>{p._avatarTried=true;const avatar=await getAvatarById(p.roblox_user_id);if(avatar)p.avatar_url=avatar.imageUrl;if(!p.avatar_url)p._avatarTried=false;}));
   }
   async function hydrateAvatars(){
     await hydratePeople([...state.players,...state.freeAgents]);
@@ -183,7 +152,7 @@
     $('pendingTeams').innerHTML=group(state.pendingTeams,'team');$('pendingPlayers').innerHTML=group(state.pendingPlayers,'player');$('pendingAgents').innerHTML=group(state.pendingAgents,'agent');
     document.querySelectorAll('[data-review]').forEach(b=>b.onclick=async()=>{b.disabled=true;try{await adminApi({action:'review',type:b.dataset.review,id:b.dataset.id,status:b.dataset.status});await loadAdmin();await loadPublic();}catch(e){alert(e.message);b.disabled=false;}});
   }
-  async function loadAdmin(){try{const d=await adminApi({action:'admin-data'});state.pendingTeams=d.pendingTeams||[];state.pendingPlayers=d.pendingPlayers||[];state.pendingAgents=d.pendingAgents||[];state.adminTeams=d.teams||[];renderAdmin();}catch(e){say('adminDataMsg','⚠️ '+e.message);}}
+  async function loadAdmin(){try{await adminApi({action:'admin-sync-roblox-ids'});const d=await adminApi({action:'admin-data'});state.pendingTeams=d.pendingTeams||[];state.pendingPlayers=d.pendingPlayers||[];state.pendingAgents=d.pendingAgents||[];state.adminTeams=d.teams||[];renderAdmin();}catch(e){say('adminDataMsg','⚠️ '+e.message);}}
   function renderAdmin(){
     options('matchHome',state.teams,'Select home team');options('matchAway',state.teams,'Select away team');options('resultMatch',state.matches.filter(m=>m.status==='upcoming'),'Select fixture');$('resultMatch').querySelectorAll('option:not(:first-child)').forEach(o=>{const m=state.matches.find(x=>x.id===o.value);if(m)o.textContent=matchName(m);});
     $('statMatch').innerHTML='<option value="">Select match</option>'+state.matches.map(m=>`<option value="${m.id}">${esc(matchName(m))} · ${esc(m.status)}</option>`).join('');
@@ -294,7 +263,7 @@
     const robloxName=String(meta.roblox_username||'').trim();
     $('ownerRobloxUsername').value=robloxName;
     robloxSetting.hidden=false;
-    const ownProfile={display_name:discordName,roblox_username:robloxName,avatar_url:''};
+    const ownProfile={display_name:discordName,roblox_username:robloxName,roblox_user_id:meta.roblox_user_id||null,avatar_url:''};
     if(robloxName)await hydratePeople([ownProfile]);
     const initials=String(discordName).trim().split(/\s+/).map(x=>x[0]).join('').slice(0,2).toUpperCase()||'E';
     identity.innerHTML=`${robloxName?playerAvatar(ownProfile,'owner-status-avatar'):`<span class="owner-avatar-unlinked">${esc(initials)}</span>`}<div><b>${esc(discordName)}</b><small>${robloxName?'Roblox · @'+esc(robloxName):'Discord account connected · add your Roblox username below'}</small></div>`;
@@ -320,7 +289,7 @@
     const username=$('ownerRobloxUsername').value.trim();
     if(username.length<3){say('ownerAuthStatus','Enter your Roblox username first.');return;}
     const button=$('saveOwnerRoblox');button.disabled=true;button.textContent='Saving…';
-    try{const {error}=await sb.auth.updateUser({data:{roblox_username:username}});if(error)throw error;avatarCache.delete(username.toLowerCase());await refreshOwner();}
+    try{const resolved=await publicApi('POST',{action:'resolve-roblox-user',roblox_username:username});const {error}=await sb.auth.updateUser({data:{roblox_username:username,roblox_user_id:resolved.roblox_user_id}});if(error)throw error;avatarCache.delete(String(resolved.roblox_user_id));await refreshOwner();}
     catch(error){say('ownerAuthStatus','Could not save Roblox username: '+(error.message||'Please try again.'));}
     finally{button.disabled=false;button.textContent='Save my Roblox avatar';}
   };
