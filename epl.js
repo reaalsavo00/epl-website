@@ -16,8 +16,13 @@
   }
   async function adminApi(body){
     const {data,error}=await sb.functions.invoke('epl-api',{body});
-    if(error) throw new Error(error.message||'Admin request failed.');
-    if(data?.error) throw new Error(data.error); return data;
+    if(error){
+      let detail='';
+      try{const payload=await error.context?.clone?.().json();detail=payload?.error||payload?.message||'';}catch{}
+      throw new Error(detail||error.message||'Admin request failed.');
+    }
+    if(data?.error) throw new Error(data.error);
+    return data;
   }
   const team = id => state.teams.find(t=>t.id===id) || {team_name:'TBD',short_code:'—'};
   const matchName = m => `${team(m.home_team_id).team_name} vs ${team(m.away_team_id).team_name}`;
