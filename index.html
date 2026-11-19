@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8"/><meta content="width=device-width, initial-scale=1" name="viewport"/>
 <meta content="#17318f" name="theme-color"/>
-<title>European Pro League | Official League Hub</title>
+<title>Practical Basketball | Official League Hub</title>
 <style>
 :root{--bg:#f3f5fc;--panel:#fff;--panel2:#eef2ff;--line:#dce3f3;--blue:#17318f;--blue2:#2448bd;--gold:#ffe500;--text:#101b45;--muted:#657196;--green:#16845b;--red:#c23b4b;--shadow:0 16px 38px rgba(23,49,143,.09)}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Arial,sans-serif}body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.23;background-image:radial-gradient(#17318f 0.65px,transparent .65px);background-size:17px 17px;mask-image:linear-gradient(to bottom,black,transparent 70%)}button,input,select,textarea{font:inherit}button{cursor:pointer}
@@ -238,16 +238,34 @@ th{background:#edf2ff!important;color:#183575!important;font-size:10px!important
 }
 </style>
 
+
+<style id="practical-basketball-refresh">
+:root{--pb-navy:#102b86;--pb-blue:#173da8;--pb-yellow:#ffe500;--pb-ink:#101d45;--pb-muted:#667493}
+body{background:#f4f6fc;color:var(--pb-ink)}
+.topbar{background:var(--pb-navy);border-bottom:4px solid var(--pb-yellow)}
+.brand strong{font-size:13px;letter-spacing:.09em}
+.brand-logo{width:52px;height:52px;object-fit:contain;background:#102b86;border:2px solid var(--pb-yellow);border-radius:50%;padding:2px}
+.hero,.home-lead{border-radius:18px}
+.card,.stat,.rules-panel{border-radius:14px}
+.btn,.adminbtn{border-radius:9px}
+.epl-team-logo{width:42px!important;height:42px!important;max-width:42px!important;max-height:42px!important;object-fit:contain!important;flex:0 0 42px!important;border-radius:10px!important;padding:3px!important;background:#fff!important;border:1px solid #e1e7f2!important}
+.match-side .epl-team-logo,.home-fixture-list .match-side .epl-team-logo{width:38px!important;height:38px!important;max-width:38px!important;max-height:38px!important;flex-basis:38px!important}
+.team-card-top .epl-team-logo,.team-profile-head .epl-team-logo{width:48px!important;height:48px!important;max-width:48px!important;max-height:48px!important;flex-basis:48px!important}
+.epl-avatar-wrap{overflow:hidden!important;border-radius:50%!important;flex:0 0 34px!important;width:34px!important;height:34px!important}
+.epl-avatar{width:34px!important;height:34px!important;max-width:34px!important;max-height:34px!important;object-fit:cover!important;border-radius:50%!important}
+@media(max-width:760px){.brand-logo{width:39px!important;height:39px!important;max-width:39px!important;max-height:39px!important}.epl-team-logo{width:36px!important;height:36px!important;max-width:36px!important;max-height:36px!important;flex-basis:36px!important}}
+</style>
+
 </head>
 <body>
 <header class="topbar"><div class="nav">
-<div class="brand"><img alt="European Pro League logo" class="brand-logo" src="epl-logo.png"/><div><strong>EUROPEAN PRO LEAGUE</strong><small>EUROPE'S COURT</small></div></div>
+<div class="brand"><img alt="Practical Basketball logo" class="brand-logo" src="practical-basketball-logo.png"/><div><strong>PRACTICAL BASKETBALL</strong><small>EUROPE'S COURT</small></div></div>
 <nav aria-label="Main website categories" class="navlinks" id="navlinks">
 <button class="active" data-page="home">Home</button><button data-page="standings">Competition</button><button data-page="fixtures">Fixtures</button><button data-page="teams">Teams</button><button data-page="players">Players &amp; Stats</button><button data-page="freeagents">Free Agents</button><button data-page="news">News</button><button data-page="register">Registration</button><button data-page="guide">Guide</button><button data-page="rules">Rules &amp; Regulations</button>
 </nav><button class="adminbtn" id="adminNav">Admin ↗</button></div></header>
 <main class="wrap">
 <section class="page active" id="page-home">
-  <div class="home-kicker"><span class="home-kicker-dot"></span> EUROPEAN PRO LEAGUE <span class="home-kicker-line"></span><span>OFFICIAL COMPETITION HUB</span><span class="home-season-tag">SEASON 01</span></div>
+  <div class="home-kicker"><span class="home-kicker-dot"></span> PRACTICAL BASKETBALL <span class="home-kicker-line"></span><span>OFFICIAL COMPETITION HUB</span><span class="home-season-tag">SEASON 01</span></div>
   <div class="data-connection" id="dataConnection" role="status" aria-live="polite"><span class="data-dot"></span><span id="dataConnectionText">Connecting to the EPL database…</span><button id="retryData" type="button">RETRY</button></div>
   <div class="home-lead">
     <div class="home-lead-copy">
@@ -257,7 +275,7 @@ th{background:#edf2ff!important;color:#183575!important;font-size:10px!important
       <div class="home-lead-actions"><button class="home-button home-button-blue" data-goto="fixtures">Explore matchday <span>↗</span></button><button class="home-text-link" data-goto="standings">View the table <span>→</span></button></div>
     </div>
     <div class="home-lead-art" aria-label="Stylised basketball court graphic">
-      <div class="court-label">EPL <span>•</span> EUROPE</div><div class="court-graphic"><div class="court-midline"></div><div class="court-circle"></div><div class="court-key court-key-left"></div><div class="court-key court-key-right"></div><div class="court-arc court-arc-left"></div><div class="court-arc court-arc-right"></div><img class="home-main-crest" src="epl-logo.png" alt="European Pro League official crest" loading="eager"/></div>
+      <div class="court-label">EPL <span>•</span> EUROPE</div><div class="court-graphic"><div class="court-midline"></div><div class="court-circle"></div><div class="court-key court-key-left"></div><div class="court-key court-key-right"></div><div class="court-arc court-arc-left"></div><div class="court-arc court-arc-right"></div><img class="home-main-crest" src="practical-basketball-logo.png" alt="Practical Basketball official crest" loading="eager"/></div>
       <div class="court-caption"><span>BUILT FOR THE GAME</span><strong>THE ROAD TO THE TITLE STARTS HERE.</strong></div>
     </div>
   </div>
