@@ -192,6 +192,52 @@ th{background:#edf2ff!important;color:#183575!important;font-size:10px!important
 .team-profile-player-info{display:flex;align-items:center;gap:10px;min-width:0}
 @media(max-width:520px){.epl-avatar-wrap,.epl-avatar{width:28px!important;height:28px!important;min-width:28px!important;max-width:28px!important;max-height:28px!important;flex-basis:28px!important}.home-fixture-list .match-side .epl-team-logo,.home-fixture-list .match-side .teammark{width:34px!important;height:34px!important;max-width:34px!important;max-height:34px!important}.team-card-heading h3{font-size:17px!important}.epl-player-info>b,.team-profile-player-copy>b{font-size:15px!important}}
 </style>
+
+<style id="epl-admin-review-layout-fix">
+/* Admin review cards: constrain uploaded logos so they never dominate a request. */
+#adminContent #pendingTeams,
+#adminContent #pendingPlayers,
+#adminContent #pendingAgents { display:grid; gap:10px; min-width:0; }
+#adminContent .epl-pending-row {
+  display:flex; align-items:center; justify-content:space-between; gap:14px;
+  min-width:0; padding:12px; border:1px solid #e1e7f1; border-radius:11px;
+  background:#fbfcff;
+}
+#adminContent .epl-pending-row > div:first-child {
+  display:grid; grid-template-columns:52px minmax(0,1fr); align-items:center;
+  column-gap:12px; row-gap:4px; min-width:0; flex:1;
+}
+#adminContent .epl-pending-row > div:first-child > b,
+#adminContent .epl-pending-row > div:first-child > small {
+  grid-column:2; min-width:0; overflow-wrap:anywhere;
+}
+#adminContent .epl-pending-row > div:first-child > b { font-size:13px; font-weight:900; color:#172e69; }
+#adminContent .epl-pending-row > div:first-child > small { font-size:11px; line-height:1.45; color:#718098; }
+#adminContent .epl-pending-row .epl-pending-logo {
+  grid-column:1; grid-row:1 / span 2; display:block;
+  width:52px!important; height:52px!important; min-width:52px!important;
+  max-width:52px!important; min-height:52px!important; max-height:52px!important;
+  object-fit:contain!important; padding:4px; border:1px solid #e0e6f0;
+  border-radius:9px; background:#fff; overflow:hidden;
+}
+#adminContent .epl-pending-row .formactions {
+  display:flex; align-items:center; justify-content:flex-end;
+  gap:7px; flex-wrap:wrap; margin:0; flex:0 0 auto;
+}
+#adminContent .epl-pending-row .btn { padding:8px 11px!important; font-size:10px!important; }
+#adminContent .epl-pending-row .btn:disabled { opacity:.55; cursor:wait; }
+#adminContent .card { min-width:0; }
+@media(max-width:620px) {
+  #adminContent .epl-pending-row { align-items:flex-start; flex-wrap:wrap; }
+  #adminContent .epl-pending-row > div:first-child { grid-template-columns:44px minmax(0,1fr); }
+  #adminContent .epl-pending-row .epl-pending-logo {
+    width:44px!important; height:44px!important; min-width:44px!important;
+    max-width:44px!important; min-height:44px!important; max-height:44px!important;
+  }
+  #adminContent .epl-pending-row .formactions { width:100%; padding-left:56px; justify-content:flex-start; }
+}
+</style>
+
 </head>
 <body>
 <header class="topbar"><div class="nav">
@@ -514,11 +560,4 @@ th{background:#edf2ff!important;color:#183575!important;font-size:10px!important
   });
   window.eplAdminClient = client;
 })();
-</script></body></html> this is my html<style id="epl-logo-size-refinement">
-/* Compact team identity marks across the league UI */
-.match-side .epl-team-logo,.match-side .teammark{width:32px!important;height:32px!important;max-width:32px!important;max-height:32px!important;padding:2px!important;border-width:1px!important;border-radius:8px!important;object-fit:contain!important}
-.team-card-top .epl-team-logo,.team-card-top .teammark{width:38px!important;height:38px!important;max-width:38px!important;max-height:38px!important;padding:2px!important;border-width:1px!important;border-radius:8px!important;object-fit:contain!important}
-.team-profile-head .epl-team-logo,.team-profile-head .teammark{width:46px!important;height:46px!important;max-width:46px!important;max-height:46px!important;padding:3px!important;border-width:1px!important;border-radius:9px!important;object-fit:contain!important}
-.home-fixture-list .match-side .epl-team-logo,.home-fixture-list .match-side .teammark{width:28px!important;height:28px!important;max-width:28px!important;max-height:28px!important}
-.epl-team-logo{object-fit:contain!important;max-width:46px}
-</style>
+</script></body></html>
